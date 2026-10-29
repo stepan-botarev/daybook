@@ -105,7 +105,6 @@
   .list div { display: flex; gap: 12px; align-items: center; }
   .list b { width: 40px; flex-shrink: 0; }
   .sw { width: 16px; height: 16px; flex-shrink: 0; border: 2px solid var(--ink); }
-  .note { margin: 0; font-size: 14px; max-width: 70ch; }
 
   /* Day view */
   .day-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
@@ -121,7 +120,7 @@
   .tag.m { border-style: dashed; }
   .tag.now { background: var(--sem); }
   .card-free { padding: 18px 16px; text-align: center; color: var(--muted); font-weight: 500; }
-  .pic { border: 3px solid var(--ink); width: min(100%, 760px); margin-inline: auto; line-height: 0; }
+  .pic { border: 3px solid var(--ink); width: 100%; line-height: 0; }
   .pic img { display: block; width: 100%; height: auto; }
 
   /* Phone: compact week grid — subject + colour only, tap opens the day */
@@ -181,25 +180,26 @@ const TIMES = [['11:00', '13:00'], ['13:00', '15:00'], ['15:00', '17:00'], ['17:
 
 // Каждая пара: слот (0–3), предмет, тип, частота, аудитория, корпус, преподаватель.
 const DAYS = [
-  { id: 'mon', short: 'Пн', name: 'Понедельник', note: 'Занятие в 11:00 — раз в две недели. Точные даты уточняй в AGNES.', classes: [
+  { id: 'mon', short: 'Пн', name: 'Понедельник', img: 'berlin.png', alt: 'Пиксельный Берлин на закате: телебашня, Бранденбургские ворота, собор',
+    classes: [
     { slot: 0, subj: 'DS',  kind: 'lec', freq: 'b', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' },
     { slot: 1, subj: 'GdP', kind: 'sem', freq: 'w', room: 'Семинарская аудитория 1305', bld: 'RUD 26', who: 'Chan' },
     { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' },
     { slot: 3, subj: 'DS',  kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' }
   ] },
-  { id: 'tue', short: 'Вт', name: 'Вторник', img: 'berlin.png', alt: 'Пиксельный Берлин на закате: телебашня, Бранденбургские ворота, собор',
-    note: 'Все занятия этого дня указаны как еженедельные.', classes: [
+  { id: 'tue', short: 'Вт', name: 'Вторник', img: 'paris.png', alt: 'Пиксельный Париж на закате: Эйфелева башня, Нотр-Дам, мост над Сеной',
+    classes: [
     { slot: 1, subj: 'ETI', kind: 'sem', freq: 'w', room: 'Семинарская аудитория 1306', bld: 'RUD 26', who: 'Casel' },
     { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
   ] },
-  { id: 'wed', short: 'Ср', name: 'Среда', img: 'paris.png', alt: 'Пиксельный Париж на закате: Эйфелева башня, Нотр-Дам, мост над Сеной',
-    note: 'Семинар в 11:00 — раз в две недели.', classes: [
+  { id: 'wed', short: 'Ср', name: 'Среда', img: 'london.png', alt: 'Пиксельный Лондон ночью: Биг-Бен, колесо обозрения, мост над Темзой',
+    classes: [
     { slot: 0, subj: 'DS',  kind: 'sem', freq: 'b', room: 'Семинарская аудитория 1305', bld: 'RUD 26', who: '' },
     { slot: 1, subj: 'GdP', kind: 'lab', freq: 'w', room: 'Аудитория 3.210', bld: 'RUD 25', who: 'Dorian' },
     { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' }
   ] },
-  { id: 'thu', short: 'Чт', name: 'Четверг', img: 'bridge.png', alt: 'Пиксельный мост и город в сумерках',
-    note: 'Все занятия этого дня указаны как еженедельные.', classes: [
+  { id: 'thu', short: 'Чт', name: 'Четверг', img: 'bridge.png', alt: 'Пиксельный мост Золотые Ворота и город ночью',
+    classes: [
     { slot: 1, subj: 'IiK', kind: 'lec', freq: 'w', room: 'Аудитория 3.001', bld: 'RUD 25', who: 'Vladova' },
     { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
   ] }
@@ -284,7 +284,6 @@ function renderDay(day) {
       <div class="day-head"><h2>${day.name}${isToday ? ' · сегодня' : ''}</h2><span>${summary(day)}</span></div>
       ${cards}
       ${day.img ? `<div class="pic"><img src="${day.img}" alt="${esc(day.alt)}"></div>` : ''}
-      <p class="note">${esc(day.note)}</p>
     </div>`;
 }
 
