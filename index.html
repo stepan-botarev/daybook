@@ -758,7 +758,7 @@ function settingsDialog(focusName) {
     <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
     <input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}" aria-label="${esc(t('profileName'))}">
     ${signed ? `<p class="note" style="margin:0">${esc(state.acct.email)} · <span id="syncLbl">${esc(syncLabel())}</span></p>` : ''}
-    ${state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
+    ${!signed && state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
     <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${cloudOn() && !signed ? row('account', t('acctEntry')) : ''}${signed ? row('signout', t('acctOut')) : ''}</div>
     <div class="dlg-actions">${signed ? '' : `<button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button>`}<span class="spacer"></span>
       <button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
@@ -826,8 +826,8 @@ document.addEventListener('click', e => {
   if (a === 'import') $('#icsInput').click();
   else if (a === 'add') editDialog(null);
   else if (a === 'close') closeDialog();
-  else if (a === 'example-new') { newProfile(t('exampleName'), exampleSeries()); tab = null; render(); }
-  else if (a === 'example') { profile().series = exampleSeries(); persist(); tab = null; render(); }
+  else if (a === 'example-new') { newProfile(t('exampleName'), exampleSeries()).demo = true; persist(); tab = null; render(); }
+  else if (a === 'example') { profile().series = exampleSeries(); profile().demo = true; persist(); tab = null; render(); }
   else if (a === 'new-profile') { newProfile(t('defaultName')); tab = null; render(); settingsDialog(true); }
   else if (a === 'export') exportBackup();
   else if (a === 'restore') $('#backupInput').click();
@@ -918,6 +918,9 @@ const dataOf = p => JSON.stringify({ name: p.name, series: p.series });
 const hashOf = str => { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return h; };
 const normSeries = x => Object.assign(cleanSeries(x), { id: String(x.id || uid()) });
 const cloudProfile = () => state.profiles.find(p => p.cloud) || null;
+// "Take a look" examples are throwaway: never kept next to an account, never uploaded as someone's timetable
+const isDemo = q => !q.cloud && (q.demo || ['Example', 'Beispiel', 'Пример'].includes(q.name));
+function dropDemos() { state.profiles = state.profiles.filter(q => !isDemo(q)); if (!profile()) state.current = state.profiles[0]?.id || null; }
 
 async function makeVault(password, plain) {
   const dekRaw = crypto.getRandomValues(new Uint8Array(32));
@@ -996,6 +999,7 @@ function adoptCloud(plain, rev, convert) {
     p = { id: uid(), created: Date.now() };
     state.profiles.push(p);
   }
+  dropDemos();
   p.cloud = true; p.name = String(plain.name || t('defaultName')).slice(0, 40);
   p.series = (plain.series || []).map(normSeries);
   p.rev = rev; p.sh = hashOf(dataOf(p));
@@ -1037,7 +1041,7 @@ function recoveryDialog(kind, msg) {
 async function finishLogin(sess, password) {
   state.acct = sessionOf(sess);
   const rows = await api('/rest/v1/vault?select=*', { auth: true });
-  const local = profile() && !profile().cloud ? profile() : null;
+  const local = profile() && !profile().cloud && !isDemo(profile()) ? profile() : null;
   if (!rows.length) {   // first sign-in: create the encrypted vault from the local profile
     const initial = local ? { name: local.name, series: local.series } : { name: sess.user.email.split('@')[0], series: [] };
     const v = await makeVault(password, initial);
@@ -1107,7 +1111,7 @@ async function signOut() {
   try { await api('/auth/v1/logout', { method: 'POST', auth: true }); } catch (_) { /* the local sign-out below is what matters */ }
   const p = cloudProfile();   // the copy lives in the account; drop it from this device so the welcome screen returns
   if (p) { state.profiles = state.profiles.filter(q => q !== p); if (state.current === p.id) state.current = state.profiles[0]?.id || null; }
-  state.acct = null; tab = null; quietSave(); closeDialog(); render();
+  dropDemos(); state.acct = null; tab = null; quietSave(); closeDialog(); render();
 }
 async function forgotPassword() {
   const email = ($('#acctForm').email.value || '').trim();
@@ -1130,6 +1134,7 @@ function selectText(el) { const r = document.createRange(); r.selectNodeContents
   if (h === 'week') tab = 'week';
   else if (TAB_IDS.includes(h)) tab = TAB_IDS.indexOf(h) + 1;
   else tab = todayDow <= 7 ? todayDow : 'week';
+  if (state.acct && cloudProfile()) { dropDemos(); quietSave(); }
   render();
   // Password-reset link from the email: #access_token=…&type=recovery
   const hp = new URLSearchParams(location.hash.slice(1));
