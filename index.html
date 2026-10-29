@@ -162,6 +162,7 @@
   input[type="time"].in::-webkit-calendar-picker-indicator, input[type="date"].in::-webkit-calendar-picker-indicator { position: absolute; top: 0; right: 0; bottom: 0; left: auto; width: 44px; height: auto; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
   .fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
   .fgrid .full { grid-column: 1 / -1; }
+  .fgrid label.f { justify-content: flex-end; }   /* a wrapped label never pushes its field out of line with the neighbour */
   dialog { border: 3px solid var(--ink); background: var(--panel); color: var(--ink); padding: 0; width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; }
   dialog:focus { outline: none; }
   /* phone: dialogs become a bottom sheet that rides above the keyboard */
@@ -329,7 +330,7 @@ const I18N = {
     subjects: 'Предметы', legend: 'Обозначения', lecture: 'Лекция', seminar: 'Семинар',
     biweekly: 'раз в 2 недели', everyWeek: 'каждую неделю', everyN: 'раз в {n} нед.', oneTimeTitle: 'Разовые события',
     edit: 'Изменить', editClass: 'Изменить занятие', newClass: 'Новое занятие',
-    fTitle: 'Название', fAbbr: 'Сокращение', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
+    fTitle: 'Название', fAbbr: 'Короткое название', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', del: 'Удалить', delSure: 'Точно удалить?',
     settings: 'Профиль', profileName: 'Имя профиля', rename: 'Сохранить имя', profilesTitle: 'Профили', newProfile: 'Новый профиль',
     backupTitle: 'Резервная копия', calendarTitle: 'Календарь',
