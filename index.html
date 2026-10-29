@@ -663,9 +663,9 @@ function editDialog(id) {
     <h2 style="margin:0;font-size:20px">${esc(id ? t('editClass') : t('newClass'))}</h2>
     <div class="fgrid">
       <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" required></label>
-      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : '')}" autocomplete="off"></label>
-      <label class="f">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}"></label>
-      <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}"></label>
+      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : 'USSR')}" autocomplete="off"></label>
+      <label class="f">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}" placeholder="Severus Snape"></label>
+      <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}" placeholder="1408"></label>
       <label class="f">${esc(t('fType'))}<select class="in" name="kind">${opt('lec', t('lecture'), s.kind)}${opt('sem', t('seminar'), s.kind)}</select></label>
       ${s.once
         ? `<label class="f">${esc(t('fDate'))}<input class="in" type="date" name="date" value="${esc(s.once)}"></label>`
