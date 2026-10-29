@@ -57,6 +57,7 @@
   .btn:hover { filter: brightness(1.05); }
   .btn.primary { background: var(--sem); box-shadow: 3px 3px 0 var(--ink); }
   .btn.prof { min-height: 40px; padding: 0 14px; font-size: 14px; max-width: min(220px, 60vw); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 36px; }
+  .btn[data-act="close"] { background: var(--lec); color: var(--lec-ink); }
   .btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
   .btn.danger { color: var(--danger); border-color: var(--danger); }
   .btn.danger.sure { background: var(--danger); color: var(--lec-ink); }
@@ -146,9 +147,12 @@
   .dlg-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
   .dlg-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
   .dlg-actions .spacer { flex: 1 1 auto; }
-  .profiles { display: flex; flex-direction: column; gap: 6px; }
-  .profiles button { justify-content: flex-start; }
-  .profiles button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
+  .menu { display: flex; flex-direction: column; }
+  .row-btn { text-align: left; background: none; border: 0; border-top: 2px solid var(--line); padding: 0 2px; min-height: 46px; font: 600 15px var(--font); cursor: pointer; }
+  .row-btn:hover { background: rgba(27, 26, 51, 0.06); }
+  .row-btn[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); padding: 0 10px; }
+  .linkbtn { border: 0; background: none; padding: 0; min-height: 44px; font: 600 14px var(--font); color: var(--danger); text-decoration: underline; cursor: pointer; }
+  .linkbtn.sure { background: var(--danger); color: var(--lec-ink); padding: 0 12px; text-decoration: none; }
   .sec { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 2px solid var(--line); }
   .sec:first-child { padding-top: 0; border-top: 0; }
   .sec h3 { margin: 0; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -687,18 +691,17 @@ function editDialog(id) {
     <div class="dlg-actions">${id ? `<button type="button" class="btn danger" data-act="delete-class">${esc(t('del'))}</button>` : ''}<span class="spacer"></span>
       <button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary">${esc(t('save'))}</button></div></form>`);
 }
-function settingsDialog() {
+function settingsDialog(focusName) {
   const p = profile();
+  const row = (act, label) => `<button type="button" class="row-btn" data-act="${act}">${esc(label)}</button>`;
   openDialog(`<div class="dlg-body">
     <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
-    <div class="sec"><label class="f">${esc(t('profileName'))}<input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}"></label>
-      <div class="toolbar"><button type="button" class="btn small" data-act="rename">${esc(t('rename'))}</button></div></div>
-    <div class="sec"><h3>${esc(t('profilesTitle'))}</h3><div class="profiles">${state.profiles.map(q => `<button type="button" class="btn small" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>
-      <div class="toolbar"><input class="in" id="newProfIn" maxlength="40" placeholder="${esc(t('namePh'))}" aria-label="${esc(t('newProfile'))}" style="flex:1 1 140px;width:auto"><button type="button" class="btn small" data-act="new-profile">${esc(t('newProfile'))}</button></div></div>
-    <div class="sec"><h3>${esc(t('calendarTitle'))}</h3><div class="toolbar"><button type="button" class="btn small" data-act="import">${esc(t('importIcs'))}</button></div></div>
-    <div class="sec"><h3>${esc(t('backupTitle'))}</h3><div class="toolbar"><button type="button" class="btn small" data-act="export">${esc(t('exportBackup'))}</button><button type="button" class="btn small" data-act="restore">${esc(t('importBackup'))}</button></div></div>
-    <div class="sec"><button type="button" class="btn danger small" data-act="delete-profile">${esc(t('delProfile'))}</button></div>
-    <div class="dlg-actions"><button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
+    <input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}" aria-label="${esc(t('profileName'))}">
+    ${state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
+    <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${row('new-profile', t('newProfile'))}</div>
+    <div class="dlg-actions"><button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button><span class="spacer"></span>
+      <button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
+  if (focusName) { const el = $('#renameIn'); el.focus(); el.select(); }
 }
 function chooseDialog(message, onReplace, onAdd) {
   openDialog(`<div class="dlg-body"><p style="margin:0">${esc(message)}</p><div class="dlg-actions">
@@ -764,8 +767,7 @@ document.addEventListener('click', e => {
   else if (a === 'close') closeDialog();
   else if (a === 'example-new') { newProfile(t('exampleName'), exampleSeries()); tab = null; render(); }
   else if (a === 'example') { profile().series = exampleSeries(); persist(); tab = null; render(); }
-  else if (a === 'rename') { const v = $('#renameIn').value.trim(); if (v) { profile().name = v.slice(0, 40); persist(); render(); settingsDialog(); toast(t('saved')); } }
-  else if (a === 'new-profile') { newProfile($('#newProfIn').value); tab = null; closeDialog(); render(); }
+  else if (a === 'new-profile') { newProfile(t('defaultName')); tab = null; render(); settingsDialog(true); }
   else if (a === 'export') exportBackup();
   else if (a === 'restore') $('#backupInput').click();
   else if (a === 'delete-class') {
@@ -778,7 +780,12 @@ document.addEventListener('click', e => {
     state.current = state.profiles[0]?.id || null; persist(); tab = null; closeDialog(); render();
   }
 });
-$('#settingsBtn').addEventListener('click', settingsDialog);
+$('#settingsBtn').addEventListener('click', () => settingsDialog());
+document.addEventListener('change', e => {
+  if (e.target.id !== 'renameIn') return;
+  const v = e.target.value.trim().slice(0, 40);
+  if (v) { profile().name = v; persist(); renderChrome(); } else e.target.value = profile().name;
+});
 $('#icsInput').addEventListener('change', e => { handleIcs(e.target.files[0]); e.target.value = ''; });
 $('#backupInput').addEventListener('change', e => { handleBackup(e.target.files[0]); e.target.value = ''; });
 document.addEventListener('submit', e => {
