@@ -580,7 +580,7 @@ function render() {
   app.innerHTML = toolbarHtml() + nav + `<div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">${tab === 'week' ? weekView(p, days) : dayView(p, tab)}</div>`;
 }
 function toolbarHtml() {
-  return `<div class="toolbar" style="margin-bottom:20px"><button type="button" class="btn primary" data-act="import">${esc(t('importIcs'))}</button><button type="button" class="btn" data-act="add">${esc(t('addClass'))}</button></div>`;
+  return `<div class="toolbar" style="margin-bottom:20px;justify-content:flex-end"><button type="button" class="btn primary" data-act="import">${esc(t('importIcs'))}</button><button type="button" class="btn" data-act="add">${esc(t('addClass'))}</button></div>`;
 }
 function welcomeView() {
   return `<section class="box hero" aria-labelledby="wt"><h2 id="wt">${esc(t('welcomeTitle'))}</h2><p>${esc(t('welcomeText'))}</p>
