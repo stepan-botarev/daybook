@@ -630,7 +630,7 @@ function renderChrome() {
   b.hidden = !p;
   if (p) { b.innerHTML = GEAR; b.title = t('settings'); b.setAttribute('aria-label', t('settings')); }
 }
-const GEAR = '<svg viewBox="0 0 11 11" width="22" height="22" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M4 0h3v1h-3zM1 1h1v1h-1zM4 1h3v1h-3zM9 1h1v1h-1zM1 2h9v1h-9zM2 3h2v1h-2zM7 3h2v1h-2zM0 4h3v1h-3zM8 4h3v1h-3zM0 5h3v1h-3zM8 5h3v1h-3zM0 6h3v1h-3zM8 6h3v1h-3zM2 7h2v1h-2zM7 7h2v1h-2zM1 8h9v1h-9zM1 9h1v1h-1zM4 9h3v1h-3zM9 9h1v1h-1zM4 10h3v1h-3z"/></svg>';
+const GEAR = '<svg viewBox="0 0 12 12" width="24" height="24" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M5 0h2v1h-2zM1 1h2v1h-2zM5 1h2v1h-2zM9 1h2v1h-2zM1 2h10v1h-10zM2 3h8v1h-8zM2 4h3v1h-3zM7 4h3v1h-3zM0 5h4v1h-4zM8 5h4v1h-4zM0 6h4v1h-4zM8 6h4v1h-4zM2 7h3v1h-3zM7 7h3v1h-3zM2 8h8v1h-8zM1 9h10v1h-10zM1 10h2v1h-2zM5 10h2v1h-2zM9 10h2v1h-2zM5 11h2v1h-2z"/></svg>';
 function usedDays(p) { return [...new Set(p.series.filter(s => !s.once).map(s => s.day))].sort((a, b) => a - b); }
 function render() {
   renderChrome();
