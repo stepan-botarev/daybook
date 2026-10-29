@@ -56,6 +56,7 @@
   .btn { min-height: 44px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel); font: 600 15px var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
   .btn:hover { filter: brightness(1.05); }
   .btn.primary { background: var(--sem); box-shadow: 3px 3px 0 var(--ink); }
+  .btn.prof { min-height: 40px; padding: 0 14px; font-size: 14px; max-width: min(220px, 60vw); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 36px; }
   .btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
   .btn.danger { color: var(--danger); border-color: var(--danger); }
   .btn.danger.sure { background: var(--danger); color: var(--lec-ink); }
@@ -63,6 +64,9 @@
 
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
 
+  .tabrow { display: flex; align-items: flex-start; gap: 8px; }
+  .tabrow nav.tabs { flex: 1 1 auto; min-width: 0; }
+  .addbtn { min-height: 48px; flex-shrink: 0; margin-left: auto; }
   nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
   nav.tabs button { min-height: 48px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel); font: 600 15px var(--font); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 0; }
   nav.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
@@ -169,6 +173,8 @@
     .time b { font-size: 13px; }
     .time span { font-size: 11px; }
     .day-head h2 { font-size: 24px; }
+    .addbtn { width: 48px; padding: 0; }
+    .addbtn .lbl { display: none; }
     .fgrid { grid-template-columns: 1fr; }
   }
 </style>
@@ -181,7 +187,7 @@
     </div>
     <div class="head-tools">
       <div class="lang" id="lang" role="group"></div>
-      <button type="button" class="btn small" id="settingsBtn" hidden></button>
+      <button type="button" class="btn prof" id="settingsBtn" hidden></button>
     </div>
   </header>
   <main id="app"></main>
@@ -211,7 +217,7 @@ const I18N = {
     fTitle: 'Class name', fAbbr: 'Short name', fTeacher: 'Teacher', fRoom: 'Room', fType: 'Type', fDay: 'Day', fDate: 'Date', fStart: 'Start', fEnd: 'End', fRepeat: 'Repeats',
     save: 'Save', cancel: 'Cancel', close: 'Close', del: 'Delete', delSure: 'Delete for sure?',
     settings: 'Profile', profileName: 'Profile name', rename: 'Save name', profilesTitle: 'Profiles', newProfile: 'New profile',
-    backupTitle: 'Backup', exportBackup: 'Download backup', importBackup: 'Restore from backup',
+    backupTitle: 'Backup', calendarTitle: 'Calendar', exportBackup: 'Download backup', importBackup: 'Restore from backup',
     delProfile: 'Delete this profile', delProfileSure: 'Delete profile and all its classes?',
     imported: { one: 'Imported {n} class', other: 'Imported {n} classes' },
     importFailed: 'This file could not be read as a calendar.', importNone: 'No classes found in this file.',
@@ -235,7 +241,7 @@ const I18N = {
     fTitle: 'Name', fAbbr: 'Kürzel', fTeacher: 'Dozent/in', fRoom: 'Raum', fType: 'Art', fDay: 'Tag', fDate: 'Datum', fStart: 'Beginn', fEnd: 'Ende', fRepeat: 'Wiederholung',
     save: 'Speichern', cancel: 'Abbrechen', close: 'Schließen', del: 'Löschen', delSure: 'Wirklich löschen?',
     settings: 'Profil', profileName: 'Profilname', rename: 'Name speichern', profilesTitle: 'Profile', newProfile: 'Neues Profil',
-    backupTitle: 'Sicherung', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
+    backupTitle: 'Sicherung', calendarTitle: 'Kalender', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
     delProfile: 'Dieses Profil löschen', delProfileSure: 'Profil mit allen Veranstaltungen löschen?',
     imported: { one: '{n} Veranstaltung importiert', other: '{n} Veranstaltungen importiert' },
     importFailed: 'Diese Datei konnte nicht als Kalender gelesen werden.', importNone: 'In dieser Datei wurden keine Veranstaltungen gefunden.',
@@ -259,7 +265,7 @@ const I18N = {
     fTitle: 'Название', fAbbr: 'Сокращение', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', del: 'Удалить', delSure: 'Точно удалить?',
     settings: 'Профиль', profileName: 'Имя профиля', rename: 'Сохранить имя', profilesTitle: 'Профили', newProfile: 'Новый профиль',
-    backupTitle: 'Резервная копия', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
+    backupTitle: 'Резервная копия', calendarTitle: 'Календарь', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
     delProfile: 'Удалить этот профиль', delProfileSure: 'Удалить профиль и все занятия?',
     imported: { one: 'Загружено {n} занятие', few: 'Загружено {n} занятия', many: 'Загружено {n} занятий', other: 'Загружено {n} занятия' },
     importFailed: 'Не удалось прочитать этот файл как календарь.', importNone: 'В файле не нашлось занятий.',
@@ -571,14 +577,14 @@ function renderChrome() {
   $('#lang').innerHTML = LANGS.map(([c, l]) => `<button type="button" data-lang="${c}" aria-pressed="${c === state.lang}">${l}</button>`).join('');
   const p = profile(), b = $('#settingsBtn');
   b.hidden = !p;
-  if (p) b.textContent = p.name + ' · ' + t('settings');
+  if (p) { b.textContent = p.name; b.title = t('settings'); b.setAttribute('aria-label', t('settings') + ': ' + p.name); }
 }
 function usedDays(p) { return [...new Set(p.series.filter(s => !s.once).map(s => s.day))].sort((a, b) => a - b); }
 function render() {
   renderChrome();
   const app = $('#app'), p = profile();
   if (!p) { app.innerHTML = welcomeView(); return; }
-  if (!p.series.length) { app.innerHTML = toolbarHtml() + emptyView(); return; }
+  if (!p.series.length) { app.innerHTML = emptyView(); return; }
   const days = usedDays(p);
   if (tab !== 'week' && !days.includes(tab)) tab = days.includes(todayDow) ? todayDow : 'week';
   const tabs = ['week', ...days];
@@ -587,10 +593,10 @@ function render() {
       const isT = id !== 'week' && id === todayDow;
       return `<button type="button" data-tab="${id}" aria-pressed="${id === tab}" class="${isT ? 'is-today' : ''}">${id === 'week' ? esc(t('week')) : esc(dayName(id, 'short'))}${isT ? `<span class="today">${esc(t('today'))}</span>` : ''}</button>`;
     }).join('') + '</nav>';
-  app.innerHTML = toolbarHtml() + nav + `<div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">${tab === 'week' ? weekView(p, days) : dayView(p, tab)}</div>`;
+  app.innerHTML = '<div class="tabrow">' + nav + addBtnHtml() + '</div>' + `<div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">${tab === 'week' ? weekView(p, days) : dayView(p, tab)}</div>`;
 }
-function toolbarHtml() {
-  return `<div class="toolbar" style="margin-bottom:20px;justify-content:flex-end"><button type="button" class="btn primary" data-act="import">${esc(t('importIcs'))}</button><button type="button" class="btn" data-act="add">${esc(t('addClass'))}</button></div>`;
+function addBtnHtml() {
+  return `<button type="button" class="btn addbtn" data-act="add" aria-label="${esc(t('addClass'))}" title="${esc(t('addClass'))}"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg><span class="lbl">${esc(t('addClass'))}</span></button>`;
 }
 function welcomeView() {
   return `<section class="box hero" aria-labelledby="wt"><h2 id="wt">${esc(t('welcomeTitle'))}</h2><p>${esc(t('welcomeText'))}</p>
@@ -689,6 +695,7 @@ function settingsDialog() {
       <div class="toolbar"><button type="button" class="btn small" data-act="rename">${esc(t('rename'))}</button></div></div>
     <div class="sec"><h3>${esc(t('profilesTitle'))}</h3><div class="profiles">${state.profiles.map(q => `<button type="button" class="btn small" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>
       <div class="toolbar"><input class="in" id="newProfIn" maxlength="40" placeholder="${esc(t('namePh'))}" aria-label="${esc(t('newProfile'))}" style="flex:1 1 140px;width:auto"><button type="button" class="btn small" data-act="new-profile">${esc(t('newProfile'))}</button></div></div>
+    <div class="sec"><h3>${esc(t('calendarTitle'))}</h3><div class="toolbar"><button type="button" class="btn small" data-act="import">${esc(t('importIcs'))}</button></div></div>
     <div class="sec"><h3>${esc(t('backupTitle'))}</h3><div class="toolbar"><button type="button" class="btn small" data-act="export">${esc(t('exportBackup'))}</button><button type="button" class="btn small" data-act="restore">${esc(t('importBackup'))}</button></div></div>
     <div class="sec"><button type="button" class="btn danger small" data-act="delete-profile">${esc(t('delProfile'))}</button></div>
     <div class="dlg-actions"><button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
@@ -709,6 +716,7 @@ function applyImport(list, mode) {
 }
 async function handleIcs(file) {
   if (!file) return;
+  closeDialog();
   let list = null;
   try { list = importFromText(await file.text()); } catch (e) { list = null; }
   if (list === null) { toast(t('importFailed')); return; }
@@ -796,7 +804,7 @@ document.addEventListener('submit', e => {
   else p.series.forEach(x => { if (x !== cur && x.title === oldTitle) x.abbr = next.abbr; }); // same subject, same short name
   persist(); closeDialog(); render(); toast(t('saved'));
 });
-dlg.addEventListener('close', () => { dlg.innerHTML = ''; });
+dlg.addEventListener('close', () => { if (!dlg.open) dlg.innerHTML = ''; });
 
 /* ───────── start ───────── */
 (function init() {
