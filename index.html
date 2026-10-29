@@ -388,6 +388,7 @@ function parseICS(text) {
       case 'LOCATION': cur.location = unesc(p.value); break;
       case 'DESCRIPTION': cur.desc = unesc(p.value); break;
       case 'STATUS': cur.status = p.value; break;
+      case 'CATEGORIES': cur.cat = unesc(p.value); break;
       case 'UID': cur.uid = p.value; break;
       case 'DTSTART': cur.dtstart = parseDT(p.value); break;
       case 'DTEND': cur.dtend = parseDT(p.value); break;
@@ -413,7 +414,7 @@ function expand(events) {
     let dur = 3600000;
     if (e.dtend && !e.dtend.allDay) dur = e.dtend.date - start; else if (e.duration) dur = e.duration;
     if (!(dur > 0) || dur > 14 * 3600000) continue;
-    const base = { title: (e.summary || '').trim(), loc: (e.location || '').trim(), desc: e.desc || '', org: e.org || '', dur };
+    const base = { title: (e.summary || '').trim(), loc: (e.location || '').trim(), desc: e.desc || '', org: e.org || '', cat: e.cat || '', dur };
     const skip = new Set(e.ex);
     if (e.uid && !e.recid && overridden.has(e.uid)) overridden.get(e.uid).forEach(v => skip.add(v));
     const add = d => { if (!skip.has(d.getTime())) out.push({ ...base, start: d, end: new Date(d.getTime() + dur) }); };
@@ -448,6 +449,28 @@ function expand(events) {
 }
 const TEACHER_RE = /(?:Dozent(?:in)?|Dozent\/in|Lehrende[rn]?|Lecturer|Instructor|Teacher|Professor|Prof\.|Преподаватель|Лектор)\s*[:\-]\s*([^\n;]+)/i;
 const SEM_RE = /(übung|uebung|seminar|tutori|praktik|\blab\b|labor|workshop|exercise|практик|семинар)/i;
+// University exports often look like "3313012 - M1.1 Diskrete Strukturen (1. Teil des Moduls M1) (Schweikardt)".
+// A leading course number marks that style: the number and module code are dropped and the last bracket is the teacher.
+const NAME_RE = /^[\p{L}][\p{L}'’.\- ]{1,38}$/u;
+function cleanTitle(raw) {
+  let title = raw.trim(), teacher = '';
+  const numbered = /^\d{4,}\s*[-–]\s*/.test(title);
+  if (numbered) title = title.replace(/^\d{4,}\s*[-–]\s*/, '').replace(/^M\d+(?:\.\d+)?\s+/, '');
+  for (;;) {
+    const m = /\s*\(([^()]*)\)\s*$/.exec(title);
+    if (!m) break;
+    const inner = m[1].trim();
+    if (/Modul/i.test(inner)) { title = title.slice(0, m.index).trim(); continue; }
+    if (numbered && !teacher && NAME_RE.test(inner) && inner.split(/\s+/).length <= 4) { teacher = inner; title = title.slice(0, m.index).trim(); continue; }
+    break;
+  }
+  return { title: title || raw.trim(), teacher };
+}
+// "Hörsaal 0115 (RUD 26, Erwin-Schrödinger-Zentrum / Modul 1)" becomes "Hörsaal 0115 · RUD 26".
+function shortRoom(loc) {
+  const m = /^([^(]+?)\s*\(([^,()]+)(?:,[^()]*)?\)\s*$/.exec(loc);
+  return m ? m[1].trim() + ' · ' + m[2].trim() : loc;
+}
 function toSeries(occs) {
   const groups = new Map();
   for (const o of occs) {
@@ -463,13 +486,18 @@ function toSeries(occs) {
     const dates = [...new Set(g.items.map(i => dateKey(i.start)))].sort();
     const roomCount = new Map();
     g.items.forEach(i => { if (i.loc) roomCount.set(i.loc, (roomCount.get(i.loc) || 0) + 1); });
-    const room = [...roomCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '';
-    let teacher = '';
+    const room = shortRoom([...roomCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '');
+    const clean = cleanTitle(g.title);
+    let teacher = clean.teacher;
     for (const i of g.items) {
+      if (teacher) break;
       const m = TEACHER_RE.exec(i.desc);
       teacher = (m && m[1].trim()) || i.org || '';
-      if (teacher) break;
     }
+    const cat = g.items[0].cat;
+    const kind = /(übung|uebung|seminar|praktik|tutori|practical|практик|семинар)/i.test(cat) ? 'sem'
+      : /(vorlesung|lecture|лекци)/i.test(cat) ? 'lec'
+      : SEM_RE.test(g.title + ' ' + g.items[0].desc) ? 'sem' : 'lec';
     let every = 1, once = null;
     if (dates.length === 1) once = dates[0];
     else {
@@ -482,8 +510,7 @@ function toSeries(occs) {
       every = Math.min(4, Math.max(1, gaps[Math.floor(gaps.length / 2)] || 1));
     }
     out.push({
-      id: uid(), title: g.title || '—', teacher, room,
-      kind: SEM_RE.test(g.title + ' ' + g.items[0].desc) ? 'sem' : 'lec',
+      id: uid(), title: clean.title || '—', teacher, room, kind,
       day: g.dow, start: g.st, end: g.en, every, once
     });
   }
