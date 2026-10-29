@@ -212,7 +212,7 @@ const I18N = {
     welcomeTitle: 'Make your timetable',
     welcomeText: 'Create a profile, then import an .ics file from your university calendar.',
     nameLabel: 'Profile name', namePh: 'e.g. Anna', create: 'Create profile', tryExample: 'Try an example',
-    emptyTitle: 'No classes yet', emptyText: 'Import an .ics file from your university calendar, or add a class by hand.',
+    emptyTitle: 'No classes yet', emptyText: 'Import an .ics file from your university calendar.',
     importIcs: 'Import .ics', addClass: 'Add class', week: 'Week', today: 'today', now: 'now',
     classes: { one: '{n} class', other: '{n} classes' },
     subjects: 'Subjects', legend: 'Key', lecture: 'Lecture', seminar: 'Seminar',
@@ -236,7 +236,7 @@ const I18N = {
     welcomeTitle: 'Erstelle deinen Stundenplan',
     welcomeText: 'Lege ein Profil an und importiere dann eine .ics-Datei aus dem Kalender deiner Uni.',
     nameLabel: 'Profilname', namePh: 'z. B. Anna', create: 'Profil erstellen', tryExample: 'Beispiel ansehen',
-    emptyTitle: 'Noch keine Veranstaltungen', emptyText: 'Importiere eine .ics-Datei aus dem Uni-Kalender oder füge eine Veranstaltung von Hand hinzu.',
+    emptyTitle: 'Noch keine Veranstaltungen', emptyText: 'Importiere eine .ics-Datei aus dem Uni-Kalender.',
     importIcs: '.ics importieren', addClass: 'Veranstaltung hinzufügen', week: 'Woche', today: 'heute', now: 'jetzt',
     classes: { one: '{n} Veranstaltung', other: '{n} Veranstaltungen' },
     subjects: 'Fächer', legend: 'Legende', lecture: 'Vorlesung', seminar: 'Übung',
@@ -260,7 +260,7 @@ const I18N = {
     welcomeTitle: 'Собери своё расписание',
     welcomeText: 'Создай профиль, а потом загрузи файл .ics из календаря университета.',
     nameLabel: 'Имя профиля', namePh: 'например, Аня', create: 'Создать профиль', tryExample: 'Посмотреть пример',
-    emptyTitle: 'Пока нет занятий', emptyText: 'Загрузи файл .ics из календаря университета или добавь занятие вручную.',
+    emptyTitle: 'Пока нет занятий', emptyText: 'Загрузи файл .ics из календаря университета.',
     importIcs: 'Загрузить .ics', addClass: 'Добавить занятие', week: 'Неделя', today: 'сегодня', now: 'идёт сейчас',
     classes: { one: '{n} пара', few: '{n} пары', many: '{n} пар', other: '{n} пары' },
     subjects: 'Предметы', legend: 'Обозначения', lecture: 'Лекция', seminar: 'Семинар',
@@ -609,7 +609,7 @@ function welcomeView() {
 }
 function emptyView() {
   return `<section class="box hero"><h2>${esc(t('emptyTitle'))}</h2><p>${esc(t('emptyText'))}</p>
-    <div class="toolbar"><button class="btn primary" type="button" data-act="import">${esc(t('importIcs'))}</button><button class="btn" type="button" data-act="add">${esc(t('addClass'))}</button><button class="btn" type="button" data-act="example">${esc(t('tryExample'))}</button></div></section>`;
+    <div class="toolbar"><button class="btn primary" type="button" data-act="import">${esc(t('importIcs'))}</button><button class="btn" type="button" data-act="example">${esc(t('tryExample'))}</button></div></section>`;
 }
 const PENCIL = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter" stroke-linecap="square" aria-hidden="true"><path d="M2 14l1-4 8-8 3 3-8 8z"/><path d="M9 4l3 3"/></svg>';
 const editBtn = id => `<button type="button" class="btn icon" data-edit="${esc(id)}" aria-label="${esc(t('edit'))}" title="${esc(t('edit'))}">${PENCIL}</button>`;
