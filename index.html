@@ -1,23 +1,24 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Daybook</title>
-<meta name="description" content="Недельное расписание HU Berlin, зимний семестр 2026/27: сетка недели и карточки пар по дням.">
+<meta name="description" content="Daybook: import your timetable from an .ics file, edit it and keep it on your device. English, Deutsch, Русский.">
 <meta name="theme-color" content="#D8CCAF">
 <meta property="og:title" content="Daybook">
-<meta property="og:description" content="Зимний семестр 2026/27: сетка недели и пары по дням.">
+<meta property="og:description" content="Your weekly class timetable from an .ics file. Stays on your device.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23D8CCAF'/%3E%3Crect x='3' y='3' width='12' height='12' fill='%232352A6' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='17' y='3' width='12' height='12' fill='%23EC6532' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='3' y='17' width='12' height='12' fill='%23EC6532' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='17' y='17' width='12' height='12' fill='%232352A6' stroke='%231B1A33' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-  /* Layout: one column, max 1040px; tabs switch between week grid and day cards. Single beige look by choice. */
+  /* One column, 900px max. Tabs switch between the week grid and day cards. One beige look by choice. */
   :root {
     --bg: #D8CCAF;
     --panel: #E9DFC8;
+    --field: #F3ECDB;
     --ink: #1B1A33;
     --muted: #5C5442;
     --line: #A79C83;
@@ -26,85 +27,79 @@
     --lec-ink: #F3ECDB;
     --sem: #EC6532;
     --sem-ink: #1B1A33;
+    --danger: #8A1F10;
     --font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
   * { box-sizing: border-box; }
   html { background: var(--bg); -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--font);
-    font-size: 15px;
-    line-height: 1.4;
-    font-variant-numeric: tabular-nums;
-  }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
   .wrap {
-    max-width: 900px;
-    margin: 0 auto;
-    padding-block: 32px 48px;
+    max-width: 900px; margin: 0 auto; padding-block: 28px 48px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    display: flex; flex-direction: column; gap: 20px;
   }
-  header {
-    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
-    gap: 8px 24px; border-bottom: 3px solid var(--ink); padding-bottom: 16px;
-  }
-  h1 { margin: 0; font-size: clamp(30px, 5.5vw, 40px); line-height: 1.05; letter-spacing: -0.01em; text-wrap: balance; }
-  .sub { margin: 6px 0 0; font-size: 15px; font-weight: 500; }
-  .source { margin: 0; font-size: 13px; color: var(--muted); }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
+  .brand { display: flex; flex-direction: column; gap: 6px; }
+  h1.logo { margin: 0; line-height: 0; }
+  .logo-svg { display: block; height: 38px; width: auto; }
+  .sub { margin: 0; font-size: 15px; font-weight: 500; }
+  .head-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .lang { display: flex; }
+  .lang button { min-height: 40px; min-width: 44px; padding: 0 10px; border: 2px solid var(--ink); background: var(--panel); font: 600 13px var(--font); cursor: pointer; margin-left: -2px; }
+  .lang button:first-child { margin-left: 0; }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
 
-  nav { display: flex; flex-wrap: wrap; gap: 8px; }
-  nav button {
-    min-height: 48px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel);
-    color: var(--ink); font: 600 15px var(--font); cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  }
-  nav button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
-  nav button:focus-visible, a:focus-visible { outline: 3px solid var(--lec); outline-offset: 2px; }
-  nav .today { font: 500 11px/1 'IBM Plex Mono', ui-monospace, Menlo, monospace; letter-spacing: 0; }
+  .btn { min-height: 44px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel); font: 600 15px var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+  .btn:hover { filter: brightness(1.05); }
+  .btn.primary { background: var(--sem); box-shadow: 3px 3px 0 var(--ink); }
+  .btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
+  .btn.danger { color: var(--danger); border-color: var(--danger); }
+  .btn.danger.sure { background: var(--danger); color: var(--lec-ink); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--lec); outline-offset: 2px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  nav.tabs button { min-height: 48px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel); font: 600 15px var(--font); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 0; }
+  nav.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
+  nav.tabs .today { font: 500 11px/1 'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+  nav.tabs button.is-today:not([aria-pressed="true"]) { box-shadow: inset 0 -4px 0 var(--sem); }
 
   .box { border: 3px solid var(--ink); background: var(--panel); }
-  .bar {
-    min-height: 32px; border-bottom: 3px solid var(--ink); display: flex; align-items: center;
-    justify-content: space-between; gap: 8px; padding: 6px 14px;
-    font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  }
+  .bar { min-height: 32px; border-bottom: 3px solid var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 14px; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  h2.bar { margin: 0; }
   .lec { background: var(--lec); color: var(--lec-ink); }
   .sem { background: var(--sem); color: var(--sem-ink); }
-  .free { background: var(--free); color: var(--ink); }
-  h2.bar { margin: 0; }
 
   /* Week grid */
   .grid-scroll { overflow-x: auto; }
-  .grid { min-width: 600px; padding: 14px; display: grid; grid-template-columns: 64px repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .grid { min-width: 560px; padding: 14px; display: grid; grid-template-columns: 64px repeat(var(--n, 5), minmax(0, 1fr)); gap: 8px; }
   .grid .head { font-weight: 700; text-align: center; }
   .time b { display: block; font-size: 16px; }
   .time span { font-size: 13px; color: var(--muted); }
-  .cell {
-    min-height: 86px; border: 2px solid var(--ink); padding: 9px;
-    display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
-    width: 100%; font: inherit; text-align: left; cursor: pointer;
-  }
+  .cellwrap { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .cell { min-height: 86px; border: 2px solid var(--ink); padding: 9px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; width: 100%; text-align: left; cursor: pointer; min-width: 0; overflow: hidden; }
+  .cell.empty { border: 2px dashed var(--line); cursor: default; }
   button.cell:hover { filter: brightness(1.08); }
-  button.cell:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-  .cell small { display: block; }
-  .cell.empty { border: 2px dashed var(--line); }
   .cell .abbr { font-size: 20px; font-weight: 700; line-height: 1; display: flex; justify-content: space-between; align-items: flex-start; }
-  .cell small { font-size: 12px; line-height: 16px; }
-  .half { font-size: 12px; font-weight: 700; line-height: 1; padding: 2px 5px; background: var(--ink); color: var(--lec-ink); }
+  .cell small { display: block; font-size: 12px; line-height: 16px; overflow-wrap: anywhere; }
   .cell.is-today { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .half { font-size: 12px; font-weight: 700; line-height: 1; padding: 2px 5px; background: var(--ink); color: var(--lec-ink); }
 
   .row { display: flex; flex-wrap: wrap; gap: 20px; }
   .row > .box { flex: 1 1 260px; min-width: 0; }
   .row > .box.wide { flex: 2 1 380px; }
   .list { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
   .list div { display: flex; gap: 12px; align-items: center; }
-  .list b { width: 40px; flex-shrink: 0; }
+  .list b { width: 44px; flex-shrink: 0; }
   .sw { width: 16px; height: 16px; flex-shrink: 0; border: 2px solid var(--ink); }
+  .once-row { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding: 10px 14px; border-top: 2px solid var(--line); font-size: 14px; }
+  .once-row:first-of-type { border-top: 0; }
+  .once-row .grow { flex: 1 1 200px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 
   /* Day view */
   .day-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
@@ -112,24 +107,50 @@
   .day-head span { font-size: 15px; font-weight: 600; }
   .cards { display: flex; flex-direction: column; gap: 10px; }
   .card-body { padding: 10px 14px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px 16px; }
-  .card-main { font-size: 14px; flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .card-main { font-size: 14px; flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 3px; overflow-wrap: anywhere; }
   .card-title { font-size: 17px; font-weight: 700; line-height: 22px; }
-  .tags { display: flex; gap: 8px; flex-wrap: wrap; }
-  .tag { font-size: 13px; font-weight: 600; padding: 3px 9px; border: 2px solid var(--ink); }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tag { font-size: 12px; font-weight: 600; padding: 3px 9px; border: 2px solid var(--ink); }
   .tag.b { background: var(--ink); color: var(--lec-ink); }
-  .tag.m { border-style: dashed; }
   .tag.now { background: var(--sem); }
-  .card-free { padding: 12px 16px; text-align: center; color: var(--muted); font-weight: 500; }
   .pic { border: 3px solid var(--ink); width: 100%; line-height: 0; aspect-ratio: 3.8 / 1; overflow: hidden; }
   .pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
-  /* Phone: compact week grid — subject + colour only, tap opens the day */
+  /* Welcome / empty */
+  .hero { max-width: 560px; margin: 8px auto 0; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .hero h2 { margin: 0; font-size: 26px; line-height: 1.15; }
+  .hero p { margin: 0; }
+  .note { font-size: 13px; color: var(--muted); }
+
+  /* Forms and dialog */
+  label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
+  .in { min-height: 44px; border: 2px solid var(--ink); background: var(--field); padding: 8px 10px; font-size: 16px; font-weight: 400; width: 100%; border-radius: 0; }
+  .fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .fgrid .full { grid-column: 1 / -1; }
+  dialog { border: 3px solid var(--ink); background: var(--panel); color: var(--ink); padding: 0; width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; }
+  dialog::backdrop { background: rgba(27, 26, 51, 0.55); }
+  .dlg-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .dlg-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .dlg-actions .spacer { flex: 1 1 auto; }
+  .profiles { display: flex; flex-direction: column; gap: 6px; }
+  .profiles button { justify-content: flex-start; }
+  .profiles button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
+  .sec { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 2px solid var(--line); }
+  .sec:first-child { padding-top: 0; border-top: 0; }
+  .sec h3 { margin: 0; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .err { color: var(--danger); font-size: 13px; font-weight: 600; margin: 0; }
+
+  #toast { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--lec-ink); padding: 10px 16px; font-weight: 600; font-size: 14px; max-width: calc(100vw - 32px); z-index: 50; }
+  footer { font-size: 13px; color: var(--muted); }
+
   @media (max-width: 600px) {
-    nav { display: grid; grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr)); gap: 6px; }
-    nav button { padding: 0 2px; font-size: 13px; min-width: 0; }
-    nav .today { font-size: 10px; }
-    .grid { min-width: 0; padding: 8px; gap: 5px; grid-template-columns: 38px repeat(4, minmax(0, 1fr)); }
-    .cell { min-height: 58px; padding: 4px; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+    .logo-svg { height: 32px; }
+    nav.tabs { display: grid; grid-template-columns: 1.5fr repeat(var(--n, 5), minmax(0, 1fr)); gap: 6px; }
+    nav.tabs button { padding: 0 2px; font-size: 13px; }
+    nav.tabs .today { font-size: 10px; }
+    nav.tabs.many .today { display: none; }
+    .grid { min-width: 0; padding: 8px; gap: 5px; grid-template-columns: 38px repeat(var(--n, 5), minmax(0, 1fr)); }
+    .cell { min-height: 58px; padding: 4px; align-items: center; justify-content: center; text-align: center; }
     .cell small { display: none; }
     .cell .abbr { font-size: 15px; flex-direction: column; align-items: center; gap: 4px; letter-spacing: -0.01em; }
     .half { font-size: 10px; padding: 1px 4px; }
@@ -137,186 +158,616 @@
     .time { padding-top: 2px; }
     .time b { font-size: 13px; }
     .time span { font-size: 11px; }
-  }
-  @media (max-width: 520px) {
-    .day-head h2 { font-size: 28px; }
+    .day-head h2 { font-size: 24px; }
+    .fgrid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
-    <div>
-      <h1>Daybook</h1>
-      <p class="sub">Расписание HU Berlin · Зимний семестр 2026/27</p>
+    <div class="brand">
+      <h1 class="logo"><svg class="logo-svg" viewBox="0 0 90 17" shape-rendering="crispEdges" role="img" aria-label="Daybook" xmlns="http://www.w3.org/2000/svg"><path fill="#EC6532" d="M9 1h3v1h-3zM9 2h3v1h-3zM9 3h3v1h-3zM9 4h3v1h-3zM4 5h8v1h-8zM2 6h10v1h-10zM1 7h4v1h-4zM8 7h4v1h-4zM1 8h3v1h-3zM9 8h3v1h-3zM1 9h3v1h-3zM9 9h3v1h-3zM1 10h3v1h-3zM9 10h3v1h-3zM1 11h4v1h-4zM8 11h4v1h-4zM2 12h10v1h-10zM4 13h8v1h-8zM17 5h8v1h-8zM15 6h10v1h-10zM14 7h4v1h-4zM21 7h4v1h-4zM14 8h3v1h-3zM22 8h3v1h-3zM14 9h3v1h-3zM22 9h3v1h-3zM14 10h3v1h-3zM22 10h3v1h-3zM14 11h4v1h-4zM21 11h4v1h-4zM15 12h10v1h-10zM17 13h8v1h-8zM27 5h3v1h-3zM35 5h3v1h-3zM27 6h3v1h-3zM35 6h3v1h-3zM28 7h3v1h-3zM34 7h3v1h-3zM28 8h3v1h-3zM34 8h3v1h-3zM29 9h3v1h-3zM33 9h3v1h-3zM29 10h7v1h-7zM30 11h5v1h-5zM30 12h4v1h-4zM29 13h4v1h-4zM28 14h4v1h-4zM27 15h4v1h-4zM27 16h3v1h-3zM40 1h3v1h-3zM40 2h3v1h-3zM40 3h3v1h-3zM40 4h3v1h-3zM40 5h8v1h-8zM40 6h10v1h-10zM40 7h4v1h-4zM47 7h4v1h-4zM40 8h3v1h-3zM48 8h3v1h-3zM40 9h3v1h-3zM48 9h3v1h-3zM40 10h3v1h-3zM48 10h3v1h-3zM40 11h4v1h-4zM47 11h4v1h-4zM40 12h10v1h-10zM40 13h8v1h-8zM56 5h5v1h-5zM54 6h9v1h-9zM53 7h4v1h-4zM60 7h4v1h-4zM53 8h3v1h-3zM61 8h3v1h-3zM53 9h3v1h-3zM61 9h3v1h-3zM53 10h3v1h-3zM61 10h3v1h-3zM53 11h4v1h-4zM60 11h4v1h-4zM54 12h9v1h-9zM56 13h5v1h-5zM69 5h5v1h-5zM67 6h9v1h-9zM66 7h4v1h-4zM73 7h4v1h-4zM66 8h3v1h-3zM74 8h3v1h-3zM66 9h3v1h-3zM74 9h3v1h-3zM66 10h3v1h-3zM74 10h3v1h-3zM66 11h4v1h-4zM73 11h4v1h-4zM67 12h9v1h-9zM69 13h5v1h-5zM79 1h3v1h-3zM79 2h3v1h-3zM79 3h3v1h-3zM79 4h3v1h-3zM79 5h3v1h-3zM87 5h3v1h-3zM79 6h3v1h-3zM86 6h3v1h-3zM79 7h3v1h-3zM85 7h3v1h-3zM79 8h3v1h-3zM84 8h3v1h-3zM79 9h3v1h-3zM83 9h4v1h-4zM79 10h7v1h-7zM79 11h3v1h-3zM84 11h3v1h-3zM79 12h3v1h-3zM85 12h3v1h-3zM79 13h3v1h-3zM86 13h4v1h-4z"/><path fill="#1B1A33" d="M8 0h3v1h-3zM8 1h3v1h-3zM8 2h3v1h-3zM8 3h3v1h-3zM3 4h8v1h-8zM1 5h10v1h-10zM0 6h4v1h-4zM7 6h4v1h-4zM0 7h3v1h-3zM8 7h3v1h-3zM0 8h3v1h-3zM8 8h3v1h-3zM0 9h3v1h-3zM8 9h3v1h-3zM0 10h4v1h-4zM7 10h4v1h-4zM1 11h10v1h-10zM3 12h8v1h-8zM16 4h8v1h-8zM14 5h10v1h-10zM13 6h4v1h-4zM20 6h4v1h-4zM13 7h3v1h-3zM21 7h3v1h-3zM13 8h3v1h-3zM21 8h3v1h-3zM13 9h3v1h-3zM21 9h3v1h-3zM13 10h4v1h-4zM20 10h4v1h-4zM14 11h10v1h-10zM16 12h8v1h-8zM26 4h3v1h-3zM34 4h3v1h-3zM26 5h3v1h-3zM34 5h3v1h-3zM27 6h3v1h-3zM33 6h3v1h-3zM27 7h3v1h-3zM33 7h3v1h-3zM28 8h3v1h-3zM32 8h3v1h-3zM28 9h7v1h-7zM29 10h5v1h-5zM29 11h4v1h-4zM28 12h4v1h-4zM27 13h4v1h-4zM26 14h4v1h-4zM26 15h3v1h-3zM39 0h3v1h-3zM39 1h3v1h-3zM39 2h3v1h-3zM39 3h3v1h-3zM39 4h8v1h-8zM39 5h10v1h-10zM39 6h4v1h-4zM46 6h4v1h-4zM39 7h3v1h-3zM47 7h3v1h-3zM39 8h3v1h-3zM47 8h3v1h-3zM39 9h3v1h-3zM47 9h3v1h-3zM39 10h4v1h-4zM46 10h4v1h-4zM39 11h10v1h-10zM39 12h8v1h-8zM55 4h5v1h-5zM53 5h9v1h-9zM52 6h4v1h-4zM59 6h4v1h-4zM52 7h3v1h-3zM60 7h3v1h-3zM52 8h3v1h-3zM60 8h3v1h-3zM52 9h3v1h-3zM60 9h3v1h-3zM52 10h4v1h-4zM59 10h4v1h-4zM53 11h9v1h-9zM55 12h5v1h-5zM68 4h5v1h-5zM66 5h9v1h-9zM65 6h4v1h-4zM72 6h4v1h-4zM65 7h3v1h-3zM73 7h3v1h-3zM65 8h3v1h-3zM73 8h3v1h-3zM65 9h3v1h-3zM73 9h3v1h-3zM65 10h4v1h-4zM72 10h4v1h-4zM66 11h9v1h-9zM68 12h5v1h-5zM78 0h3v1h-3zM78 1h3v1h-3zM78 2h3v1h-3zM78 3h3v1h-3zM78 4h3v1h-3zM86 4h3v1h-3zM78 5h3v1h-3zM85 5h3v1h-3zM78 6h3v1h-3zM84 6h3v1h-3zM78 7h3v1h-3zM83 7h3v1h-3zM78 8h3v1h-3zM82 8h4v1h-4zM78 9h7v1h-7zM78 10h3v1h-3zM83 10h3v1h-3zM78 11h3v1h-3zM84 11h3v1h-3zM78 12h3v1h-3zM85 12h4v1h-4z"/></svg></h1>
+      <p class="sub" id="tagline"></p>
     </div>
-    <p class="source">По расписанию HU от 14.10.2026</p>
+    <div class="head-tools">
+      <div class="lang" id="lang" role="group"></div>
+      <button type="button" class="btn small" id="settingsBtn" hidden></button>
+    </div>
   </header>
-
-  <nav id="tabs" aria-label="Дни недели"></nav>
-
-  <main id="view"></main>
+  <main id="app"></main>
+  <footer id="privacy"></footer>
 </div>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="icsInput" accept=".ics,text/calendar" hidden>
+<input type="file" id="backupInput" accept=".json,application/json" hidden>
 
 <script>
-const KIND = {
-  lec: { label: 'Лекция', cls: 'lec' },
-  sem: { label: 'Семинар', cls: 'sem' },
-  lab: { label: 'Практикум', cls: 'sem' }
+'use strict';
+
+/* ───────── i18n ───────── */
+const I18N = {
+  en: {
+    tagline: 'Your weekly class timetable',
+    privacy: 'Your timetable stays in this browser. Nothing is uploaded or sent anywhere.',
+    welcomeTitle: 'Make your timetable',
+    welcomeText: 'Create a profile, import an .ics file from your university calendar, then edit class names, teachers and rooms.',
+    nameLabel: 'Profile name', namePh: 'e.g. Anna', create: 'Create profile', tryExample: 'Try an example',
+    emptyTitle: 'No classes yet', emptyText: 'Import an .ics file from your university calendar, or add a class by hand.',
+    importIcs: 'Import .ics', addClass: 'Add class', week: 'Week', today: 'today', now: 'now',
+    classes: { one: '{n} class', other: '{n} classes' },
+    subjects: 'Subjects', legend: 'Key', lecture: 'Lecture', seminar: 'Seminar / practical',
+    biweekly: 'every 2 weeks', everyWeek: 'every week', everyN: 'every {n} weeks', oneTimeTitle: 'One-time events',
+    edit: 'Edit', editClass: 'Edit class', newClass: 'New class',
+    fTitle: 'Class name', fTeacher: 'Teacher', fRoom: 'Room', fType: 'Type', fDay: 'Day', fDate: 'Date', fStart: 'Start', fEnd: 'End', fRepeat: 'Repeats',
+    save: 'Save', cancel: 'Cancel', close: 'Close', del: 'Delete', delSure: 'Delete for sure?',
+    settings: 'Profile', profileName: 'Profile name', rename: 'Save name', profilesTitle: 'Profiles', newProfile: 'New profile',
+    backupTitle: 'Backup', exportBackup: 'Download backup', importBackup: 'Restore from backup',
+    delProfile: 'Delete this profile', delProfileSure: 'Delete profile and all its classes?',
+    imported: { one: 'Imported {n} class', other: 'Imported {n} classes' },
+    importFailed: 'This file could not be read as a calendar.', importNone: 'No classes found in this file.',
+    replaceOrAdd: 'You already have classes. Replace them with the imported ones, or add the imported ones?', replace: 'Replace', add: 'Add',
+    storageWarn: 'This browser blocks saving. Your changes will be lost when you close the page.',
+    errTitle: 'Enter a class name.', errTime: 'End time must be after start time.', errDate: 'Choose a date.',
+    backupInvalid: 'This backup file is not valid.', backupRestored: 'Backup restored as a new profile.',
+    exampleName: 'Example', defaultName: 'Me', teacherPrefix: 'Teacher', saved: 'Saved', deleted: 'Deleted'
+  },
+  de: {
+    tagline: 'Dein Stundenplan für die Woche',
+    privacy: 'Dein Stundenplan bleibt in diesem Browser. Nichts wird hochgeladen oder verschickt.',
+    welcomeTitle: 'Erstelle deinen Stundenplan',
+    welcomeText: 'Lege ein Profil an, importiere eine .ics-Datei aus dem Kalender deiner Uni und bearbeite dann Namen, Dozenten und Räume.',
+    nameLabel: 'Profilname', namePh: 'z. B. Anna', create: 'Profil erstellen', tryExample: 'Beispiel ansehen',
+    emptyTitle: 'Noch keine Veranstaltungen', emptyText: 'Importiere eine .ics-Datei aus dem Uni-Kalender oder füge eine Veranstaltung von Hand hinzu.',
+    importIcs: '.ics importieren', addClass: 'Veranstaltung hinzufügen', week: 'Woche', today: 'heute', now: 'jetzt',
+    classes: { one: '{n} Veranstaltung', other: '{n} Veranstaltungen' },
+    subjects: 'Fächer', legend: 'Legende', lecture: 'Vorlesung', seminar: 'Seminar / Übung',
+    biweekly: 'alle 2 Wochen', everyWeek: 'jede Woche', everyN: 'alle {n} Wochen', oneTimeTitle: 'Einzeltermine',
+    edit: 'Bearbeiten', editClass: 'Veranstaltung bearbeiten', newClass: 'Neue Veranstaltung',
+    fTitle: 'Name', fTeacher: 'Dozent/in', fRoom: 'Raum', fType: 'Art', fDay: 'Tag', fDate: 'Datum', fStart: 'Beginn', fEnd: 'Ende', fRepeat: 'Wiederholung',
+    save: 'Speichern', cancel: 'Abbrechen', close: 'Schließen', del: 'Löschen', delSure: 'Wirklich löschen?',
+    settings: 'Profil', profileName: 'Profilname', rename: 'Name speichern', profilesTitle: 'Profile', newProfile: 'Neues Profil',
+    backupTitle: 'Sicherung', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
+    delProfile: 'Dieses Profil löschen', delProfileSure: 'Profil mit allen Veranstaltungen löschen?',
+    imported: { one: '{n} Veranstaltung importiert', other: '{n} Veranstaltungen importiert' },
+    importFailed: 'Diese Datei konnte nicht als Kalender gelesen werden.', importNone: 'In dieser Datei wurden keine Veranstaltungen gefunden.',
+    replaceOrAdd: 'Du hast schon Veranstaltungen. Durch die importierten ersetzen oder die importierten hinzufügen?', replace: 'Ersetzen', add: 'Hinzufügen',
+    storageWarn: 'Dieser Browser verhindert das Speichern. Änderungen gehen beim Schließen der Seite verloren.',
+    errTitle: 'Bitte einen Namen eingeben.', errTime: 'Das Ende muss nach dem Beginn liegen.', errDate: 'Bitte ein Datum wählen.',
+    backupInvalid: 'Diese Sicherungsdatei ist ungültig.', backupRestored: 'Sicherung als neues Profil wiederhergestellt.',
+    exampleName: 'Beispiel', defaultName: 'Ich', teacherPrefix: 'Dozent/in', saved: 'Gespeichert', deleted: 'Gelöscht'
+  },
+  ru: {
+    tagline: 'Твоё расписание на неделю',
+    privacy: 'Расписание хранится только в этом браузере. Ничего не загружается и не отправляется.',
+    welcomeTitle: 'Собери своё расписание',
+    welcomeText: 'Создай профиль, загрузи файл .ics из календаря университета, а потом поправь названия, преподавателей и аудитории.',
+    nameLabel: 'Имя профиля', namePh: 'например, Аня', create: 'Создать профиль', tryExample: 'Посмотреть пример',
+    emptyTitle: 'Пока нет занятий', emptyText: 'Загрузи файл .ics из календаря университета или добавь занятие вручную.',
+    importIcs: 'Загрузить .ics', addClass: 'Добавить занятие', week: 'Неделя', today: 'сегодня', now: 'идёт сейчас',
+    classes: { one: '{n} пара', few: '{n} пары', many: '{n} пар', other: '{n} пары' },
+    subjects: 'Предметы', legend: 'Обозначения', lecture: 'Лекция', seminar: 'Семинар / практикум',
+    biweekly: 'раз в 2 недели', everyWeek: 'каждую неделю', everyN: 'раз в {n} нед.', oneTimeTitle: 'Разовые события',
+    edit: 'Изменить', editClass: 'Изменить занятие', newClass: 'Новое занятие',
+    fTitle: 'Название', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
+    save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', del: 'Удалить', delSure: 'Точно удалить?',
+    settings: 'Профиль', profileName: 'Имя профиля', rename: 'Сохранить имя', profilesTitle: 'Профили', newProfile: 'Новый профиль',
+    backupTitle: 'Резервная копия', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
+    delProfile: 'Удалить этот профиль', delProfileSure: 'Удалить профиль и все занятия?',
+    imported: { one: 'Загружено {n} занятие', few: 'Загружено {n} занятия', many: 'Загружено {n} занятий', other: 'Загружено {n} занятия' },
+    importFailed: 'Не удалось прочитать этот файл как календарь.', importNone: 'В файле не нашлось занятий.',
+    replaceOrAdd: 'Занятия уже есть. Заменить их загруженными или добавить загруженные к ним?', replace: 'Заменить', add: 'Добавить',
+    storageWarn: 'Браузер не даёт сохранять данные. Изменения пропадут, когда ты закроешь страницу.',
+    errTitle: 'Введи название.', errTime: 'Конец должен быть позже начала.', errDate: 'Выбери дату.',
+    backupInvalid: 'Файл копии не подходит.', backupRestored: 'Копия восстановлена как новый профиль.',
+    exampleName: 'Пример', defaultName: 'Я', teacherPrefix: 'Преподаватель', saved: 'Сохранено', deleted: 'Удалено'
+  }
 };
-const FREQ = {
-  w: { label: 'каждую неделю', cls: '' },
-  b: { label: 'раз в 2 недели', cls: 'b' },
-  m: { label: 'добавлено вручную', cls: 'm' }
-};
-const SUBJECTS = {
-  DS: 'Diskrete Strukturen',
-  GdP: 'Grundlagen der Programmierung',
-  ETI: 'Einführung in die Theoretische Informatik',
-  IiK: 'Informatik im Kontext'
-};
-const TIMES = [['11:00', '13:00'], ['13:00', '15:00'], ['15:00', '17:00'], ['17:00', '19:00']];
+const LANGS = [['en', 'EN'], ['de', 'DE'], ['ru', 'RU']];
 
-// Каждая пара: слот (0–3), предмет, тип, частота, аудитория, корпус, преподаватель.
-const DAYS = [
-  { id: 'mon', short: 'Пн', name: 'Понедельник', img: 'berlin.png', alt: 'Пиксельный Берлин на закате: телебашня, Бранденбургские ворота, собор',
-    classes: [
-    { slot: 0, subj: 'DS',  kind: 'lec', freq: 'b', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' },
-    { slot: 1, subj: 'GdP', kind: 'sem', freq: 'w', room: 'Аудитория 1305', bld: 'RUD 26', who: 'Chan' },
-    { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' },
-    { slot: 3, subj: 'DS',  kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' }
-  ] },
-  { id: 'tue', short: 'Вт', name: 'Вторник', img: 'paris.png', alt: 'Пиксельный Париж на закате: Эйфелева башня, Нотр-Дам, мост над Сеной',
-    classes: [
-    { slot: 1, subj: 'ETI', kind: 'sem', freq: 'w', room: 'Аудитория 1306', bld: 'RUD 26', who: 'Casel' },
-    { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
-  ] },
-  { id: 'wed', short: 'Ср', name: 'Среда', img: 'london.png', alt: 'Пиксельный Лондон ночью: Биг-Бен, колесо обозрения, мост над Темзой',
-    classes: [
-    { slot: 0, subj: 'DS',  kind: 'sem', freq: 'b', room: 'Аудитория 1305', bld: 'RUD 26', who: '' },
-    { slot: 1, subj: 'GdP', kind: 'lab', freq: 'w', room: 'Аудитория 3.210', bld: 'RUD 25', who: 'Dorian' },
-    { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' }
-  ] },
-  { id: 'thu', short: 'Чт', name: 'Четверг', img: 'bridge.png', alt: 'Пиксельный мост Золотые Ворота и город ночью',
-    classes: [
-    { slot: 1, subj: 'IiK', kind: 'lec', freq: 'w', room: 'Аудитория 3.001', bld: 'RUD 25', who: 'Vladova' },
-    { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
-  ] }
-];
+/* ───────── helpers ───────── */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+const pad = n => String(n).padStart(2, '0');
+const hhmm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const dateKey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+const dowOf = d => (d.getDay() + 6) % 7 + 1; // Monday = 1 … Sunday = 7
+const TAB_IDS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const PICS = ['berlin.png', 'paris.png', 'london.png', 'bridge.png'];
 
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const plural = n => n === 1 ? 'пара' : (n >= 2 && n <= 4 ? 'пары' : 'пар');
-const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-
-const now = new Date();
-const todayId = ['', 'mon', 'tue', 'wed', 'thu', '', ''][now.getDay()] || null;
-const nowMin = now.getHours() * 60 + now.getMinutes();
-
-function summary(day) {
-  const slots = day.classes.map(c => c.slot);
-  const from = TIMES[Math.min(...slots)][0], to = TIMES[Math.max(...slots)][1];
-  return `${day.classes.length} ${plural(day.classes.length)} · ${from}–${to}`;
+/* ───────── state & storage ───────── */
+const KEY = 'daybook:v1';
+let storageOk = true;
+function detectLang() {
+  const l = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  return I18N[l] ? l : 'en';
+}
+function loadState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY));
+    if (raw && Array.isArray(raw.profiles)) return raw;
+  } catch (e) { /* unreadable or blocked: start fresh */ }
+  return { v: 1, lang: detectLang(), profiles: [], current: null };
+}
+let state = loadState();
+if (!I18N[state.lang]) state.lang = detectLang();
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+  catch (e) { storageOk = false; }
+}
+function profile() { return state.profiles.find(p => p.id === state.current) || null; }
+function t(key, n) {
+  const dict = I18N[state.lang] || I18N.en;
+  const v = dict[key] ?? I18N.en[key] ?? key;
+  if (v && typeof v === 'object') {
+    const rule = new Intl.PluralRules(state.lang).select(n);
+    return (v[rule] || v.other).replace('{n}', n);
+  }
+  return String(v).replace('{n}', n);
+}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function dayName(d, style) {
+  const dt = new Date(2024, 0, d); // 1 Jan 2024 is a Monday
+  const s = new Intl.DateTimeFormat(state.lang, { weekday: style }).format(dt).replace(/\.$/, '');
+  return capitalize(s);
+}
+function dateLabel(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Intl.DateTimeFormat(state.lang, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d));
+}
+function freqLabel(s) {
+  if (s.once) return dateLabel(s.once);
+  return s.every === 1 ? t('everyWeek') : s.every === 2 ? t('biweekly') : t('everyN', s.every);
+}
+const STOP = new Set(['der', 'die', 'das', 'und', 'in', 'im', 'für', 'zur', 'zum', 'of', 'the', 'and', 'to', 'in', 'for', 'a', 'и', 'в', 'на', 'к', 'с', 'по', 'для', 'to']);
+function abbr(title) {
+  const words = title.replace(/[()\/,:;.\-–—]/g, ' ').split(/\s+/).filter(Boolean);
+  const main = words.filter(w => !STOP.has(w.toLowerCase()));
+  if (main.length >= 2) return main.slice(0, 3).map(w => w[0].toUpperCase()).join('');
+  const w = (main[0] || words[0] || '?');
+  return w.length <= 4 ? w : w.slice(0, 3);
 }
 
-function renderWeek() {
-  let cells = '<span></span>' + DAYS.map(d => `<span class="head">${d.short}</span>`).join('');
-  TIMES.forEach(([f, t], i) => {
-    cells += `<div class="time"><b>${f}</b><span>${t}</span></div>`;
-    DAYS.forEach(d => {
-      const c = d.classes.find(x => x.slot === i);
-      if (!c) { cells += '<div class="cell empty" aria-hidden="true"></div>'; return; }
-      const k = KIND[c.kind];
-      const today = d.id === todayId ? ' is-today' : '';
-      cells += `<button type="button" class="cell ${k.cls}${today}" data-go="${d.id}" aria-label="${d.name}, ${f}: ${SUBJECTS[c.subj]}, ${k.label.toLowerCase()}">
-        <span class="abbr">${c.subj}${c.freq === 'b' ? '<span class="half" title="раз в две недели">½</span>' : ''}</span>
-        <small><b>${k.label}</b><br>${esc(c.room.replace(/^\D+/, ''))} · ${c.bld}</small>
-      </button>`;
-    });
+/* ───────── ICS import ───────── */
+function unfold(text) { return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n[ \t]/g, ''); }
+function unesc(s) { return s.replace(/\\[nN]/g, '\n').replace(/\\([,;\\])/g, '$1'); }
+function splitProp(line) {
+  let q = false, i = 0;
+  for (; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') q = !q; else if (c === ':' && !q) break;
+  }
+  if (i >= line.length) return null;
+  const parts = line.slice(0, i).split(';');
+  const name = parts.shift().toUpperCase();
+  const params = {};
+  parts.forEach(p => { const j = p.indexOf('='); if (j > 0) params[p.slice(0, j).toUpperCase()] = p.slice(j + 1).replace(/^"|"$/g, ''); });
+  return { name, params, value: line.slice(i + 1) };
+}
+function parseDT(v) {
+  const m = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?)?(Z)?$/.exec(String(v).trim());
+  if (!m) return null;
+  const [, y, mo, d, h, mi, s, z] = m;
+  if (h === undefined) return { date: new Date(+y, +mo - 1, +d), allDay: true };
+  // A trailing Z is UTC and is shown in the device's time zone. Anything else is the wall-clock time as written.
+  if (z) return { date: new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +(s || 0))), allDay: false };
+  return { date: new Date(+y, +mo - 1, +d, +h, +mi, +(s || 0)), allDay: false };
+}
+function parseDuration(v) {
+  const m = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/.exec(v.trim());
+  if (!m) return 0;
+  return (((+m[1] || 0) * 7 + (+m[2] || 0)) * 24 * 3600 + (+m[3] || 0) * 3600 + (+m[4] || 0) * 60 + (+m[5] || 0)) * 1000;
+}
+function parseRule(v) {
+  const r = {};
+  v.split(';').forEach(p => { const j = p.indexOf('='); if (j > 0) r[p.slice(0, j).toUpperCase()] = p.slice(j + 1); });
+  if (r.UNTIL) {
+    const u = parseDT(r.UNTIL);
+    r.until = u ? (u.allDay ? new Date(u.date.getFullYear(), u.date.getMonth(), u.date.getDate() + 1) : u.date) : null;
+  }
+  return r;
+}
+function parseICS(text) {
+  const lines = unfold(text).split('\n');
+  const events = [];
+  let cur = null, depth = 0;
+  for (const ln of lines) {
+    if (ln === 'BEGIN:VEVENT') { cur = { ex: [] }; depth = 0; continue; }
+    if (ln === 'END:VEVENT') { if (cur) events.push(cur); cur = null; continue; }
+    if (!cur) continue;
+    if (ln.startsWith('BEGIN:')) { depth++; continue; }   // VALARM and similar nested blocks
+    if (ln.startsWith('END:')) { depth--; continue; }
+    if (depth > 0) continue;
+    const p = splitProp(ln);
+    if (!p) continue;
+    switch (p.name) {
+      case 'SUMMARY': cur.summary = unesc(p.value); break;
+      case 'LOCATION': cur.location = unesc(p.value); break;
+      case 'DESCRIPTION': cur.desc = unesc(p.value); break;
+      case 'STATUS': cur.status = p.value; break;
+      case 'UID': cur.uid = p.value; break;
+      case 'DTSTART': cur.dtstart = parseDT(p.value); break;
+      case 'DTEND': cur.dtend = parseDT(p.value); break;
+      case 'DURATION': cur.duration = parseDuration(p.value); break;
+      case 'RRULE': cur.rrule = parseRule(p.value); break;
+      case 'RECURRENCE-ID': cur.recid = parseDT(p.value); break;
+      case 'EXDATE': p.value.split(',').forEach(x => { const d = parseDT(x); if (d) cur.ex.push(d.date.getTime()); }); break;
+      case 'ORGANIZER': if (p.params.CN && !/@/.test(p.params.CN)) cur.org = p.params.CN; break;
+    }
+  }
+  return events;
+}
+const BYDAY = { MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 7 };
+function expand(events) {
+  const overridden = new Map();
+  events.forEach(e => {
+    if (e.recid && e.uid) { if (!overridden.has(e.uid)) overridden.set(e.uid, new Set()); overridden.get(e.uid).add(e.recid.date.getTime()); }
   });
-  return `
-    <div class="cards" style="gap:20px">
-      <section class="box grid-scroll" aria-label="Сетка недели"><div class="grid">${cells}</div></section>
-      <div class="row">
-        <section class="box wide">
-          <h2 class="bar sem">Предметы</h2>
-          <div class="list">${Object.entries(SUBJECTS).map(([a, n]) => `<div><b>${a}</b><span>${n}</span></div>`).join('')}</div>
-        </section>
-        <section class="box">
-          <h2 class="bar lec">Обозначения</h2>
-          <div class="list">
-            <div><span class="sw lec"></span>лекция</div>
-            <div><span class="sw sem"></span>семинар / практикум</div>
-            <div><span class="half">½</span>раз в две недели</div>
-          </div>
-        </section>
-      </div>
-    </div>`;
-}
-
-function renderDay(day) {
-  const isToday = day.id === todayId;
-  const first = Math.min(...day.classes.map(c => c.slot));
-  const last = Math.max(...day.classes.map(c => c.slot));
-  let cards = '';
-  for (let i = first === 1 ? 0 : first; i <= last; i++) {
-    const [f, t] = TIMES[i];
-    const c = day.classes.find(x => x.slot === i);
-    if (!c) {
-      cards += `<section class="box"><div class="bar free"><span>Свободно</span><span>${f}–${t}</span></div><div class="card-free">Нет занятий</div></section>`;
+  const out = [];
+  for (const e of events) {
+    if (!e.dtstart || e.dtstart.allDay || /CANCEL/i.test(e.status || '')) continue;
+    const start = e.dtstart.date;
+    let dur = 3600000;
+    if (e.dtend && !e.dtend.allDay) dur = e.dtend.date - start; else if (e.duration) dur = e.duration;
+    if (!(dur > 0) || dur > 14 * 3600000) continue;
+    const base = { title: (e.summary || '').trim(), loc: (e.location || '').trim(), desc: e.desc || '', org: e.org || '', dur };
+    const skip = new Set(e.ex);
+    if (e.uid && !e.recid && overridden.has(e.uid)) overridden.get(e.uid).forEach(v => skip.add(v));
+    const add = d => { if (!skip.has(d.getTime())) out.push({ ...base, start: d, end: new Date(d.getTime() + dur) }); };
+    const r = e.rrule;
+    if (!r || e.recid || (r.FREQ !== 'WEEKLY' && r.FREQ !== 'DAILY')) { add(start); continue; }
+    const interval = Math.max(1, +r.INTERVAL || 1);
+    const count = +r.COUNT || 0;
+    const cap = new Date(Math.min(r.until ? r.until.getTime() : Infinity, start.getTime() + 400 * 864e5));
+    let n = 0;
+    if (r.FREQ === 'DAILY') {
+      for (let i = 0; i < 800; i++) {
+        const occ = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i * interval, start.getHours(), start.getMinutes());
+        if (occ > cap || (count && n >= count)) break;
+        add(occ); n++;
+      }
       continue;
     }
-    const k = KIND[c.kind], fr = FREQ[c.freq];
-    const live = isToday && nowMin >= toMin(f) && nowMin < toMin(t);
-    cards += `<section class="box">
-      <div class="bar ${k.cls}"><span>${k.label}</span><span>${f}–${t}</span></div>
-      <div class="card-body">
-        <div class="card-main">
-          <div class="card-title">${SUBJECTS[c.subj]}</div>
-          <div>${esc(c.room)} · ${c.bld}${c.who ? `<br>Преподаватель: ${esc(c.who)}` : ''}</div>
-        </div>
-        <div class="tags">${live ? '<span class="tag now">идёт сейчас</span>' : ''}<span class="tag ${fr.cls}">${fr.label}</span></div>
-      </div>
-    </section>`;
+    const dow0 = dowOf(start);
+    const days = (r.BYDAY ? r.BYDAY.split(',').map(x => BYDAY[x.replace(/^[+-]?\d+/, '')]).filter(Boolean) : [dow0]).sort((a, b) => a - b);
+    let done = false;
+    for (let w = 0; w < 120 * interval && !done; w += interval) {
+      for (const d of days) {
+        const occ = new Date(start.getFullYear(), start.getMonth(), start.getDate() - (dow0 - 1) + w * 7 + (d - 1), start.getHours(), start.getMinutes());
+        if (occ < start) continue;
+        if (occ > cap) { done = true; break; }
+        add(occ); n++;
+        if (count && n >= count) { done = true; break; }
+      }
+    }
   }
-  return `
-    <div class="cards">
-      <div class="day-head"><h2>${day.name}${isToday ? ' · сегодня' : ''}</h2><span>${summary(day)}</span></div>
-      ${cards}
-      ${day.img ? `<div class="pic"><img src="${day.img}" alt="${esc(day.alt)}"></div>` : ''}
-    </div>`;
+  return out;
+}
+const TEACHER_RE = /(?:Dozent(?:in)?|Dozent\/in|Lehrende[rn]?|Lecturer|Instructor|Teacher|Professor|Prof\.|Преподаватель|Лектор)\s*[:\-]\s*([^\n;]+)/i;
+const SEM_RE = /(übung|uebung|seminar|tutori|praktik|\blab\b|labor|workshop|exercise|практик|семинар)/i;
+function toSeries(occs) {
+  const groups = new Map();
+  for (const o of occs) {
+    const dow = dowOf(o.start);
+    const sameDay = dateKey(o.end) === dateKey(o.start);
+    const st = hhmm(o.start), en = sameDay ? hhmm(o.end) : '23:59';
+    const key = [o.title.toLowerCase(), dow, st, en].join('|');
+    if (!groups.has(key)) groups.set(key, { title: o.title, dow, st, en, items: [] });
+    groups.get(key).items.push(o);
+  }
+  const out = [];
+  for (const g of groups.values()) {
+    const dates = [...new Set(g.items.map(i => dateKey(i.start)))].sort();
+    const roomCount = new Map();
+    g.items.forEach(i => { if (i.loc) roomCount.set(i.loc, (roomCount.get(i.loc) || 0) + 1); });
+    const room = [...roomCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+    let teacher = '';
+    for (const i of g.items) {
+      const m = TEACHER_RE.exec(i.desc);
+      teacher = (m && m[1].trim()) || i.org || '';
+      if (teacher) break;
+    }
+    let every = 1, once = null;
+    if (dates.length === 1) once = dates[0];
+    else {
+      const gaps = [];
+      for (let i = 1; i < dates.length; i++) {
+        const a = dates[i - 1].split('-').map(Number), b = dates[i].split('-').map(Number);
+        gaps.push(Math.round((Date.UTC(b[0], b[1] - 1, b[2]) - Date.UTC(a[0], a[1] - 1, a[2])) / (7 * 864e5)));
+      }
+      gaps.sort((x, y) => x - y);
+      every = Math.min(4, Math.max(1, gaps[Math.floor(gaps.length / 2)] || 1));
+    }
+    out.push({
+      id: uid(), title: g.title || '—', teacher, room,
+      kind: SEM_RE.test(g.title + ' ' + g.items[0].desc) ? 'sem' : 'lec',
+      day: g.dow, start: g.st, end: g.en, every, once
+    });
+  }
+  return out.sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
+}
+function importFromText(text) {
+  if (!/BEGIN:VCALENDAR/i.test(text)) return null;
+  return toSeries(expand(parseICS(text)));
 }
 
-const TABS = [{ id: 'week', short: 'Неделя' }, ...DAYS];
-let current = TABS.some(t => t.id === location.hash.slice(1)) ? location.hash.slice(1) : (todayId || 'week');
+/* ───────── example data ───────── */
+function exampleSeries() {
+  const s = (day, start, end, kind, every, title, room, teacher) => ({ id: uid(), day, start, end, kind, every, once: null, title, room, teacher });
+  const DS = 'Diskrete Strukturen', GP = 'Grundlagen der Programmierung', ET = 'Einführung in die Theoretische Informatik';
+  return [
+    s(1, '11:00', '13:00', 'lec', 2, DS, '0115 · RUD 26', 'Schweikardt'),
+    s(1, '13:00', '15:00', 'sem', 1, GP, '1305 · RUD 26', 'Chan'),
+    s(1, '15:00', '17:00', 'lec', 1, GP, '0115 · RUD 26', 'Redlich'),
+    s(1, '17:00', '19:00', 'lec', 1, DS, '0115 · RUD 26', 'Schweikardt'),
+    s(2, '13:00', '15:00', 'sem', 1, ET, '1306 · RUD 26', 'Casel'),
+    s(2, '15:00', '17:00', 'lec', 1, ET, '0115 · RUD 26', 'Kratsch'),
+    s(3, '11:00', '13:00', 'sem', 2, DS, '1305 · RUD 26', ''),
+    s(3, '13:00', '15:00', 'sem', 1, GP, '3.210 · RUD 25', 'Dorian'),
+    s(3, '15:00', '17:00', 'lec', 1, GP, '0115 · RUD 26', 'Redlich'),
+    s(4, '13:00', '15:00', 'lec', 1, 'Informatik im Kontext', '3.001 · RUD 25', 'Vladova'),
+    s(4, '15:00', '17:00', 'lec', 1, ET, '0115 · RUD 26', 'Kratsch')
+  ];
+}
 
+/* ───────── profile operations ───────── */
+function newProfile(name, series) {
+  const p = { id: uid(), name: (name || '').trim() || t('defaultName'), created: Date.now(), series: series || [] };
+  state.profiles.push(p);
+  state.current = p.id;
+  persist();
+  return p;
+}
+
+/* ───────── rendering ───────── */
+let tab = null;               // 'week' or 1…7
+const todayDow = dowOf(new Date());
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { el.hidden = true; }, 3200);
+}
+function renderChrome() {
+  document.documentElement.lang = state.lang;
+  $('#tagline').textContent = t('tagline');
+  $('#privacy').textContent = t('privacy') + (storageOk ? '' : ' ' + t('storageWarn'));
+  $('#lang').innerHTML = LANGS.map(([c, l]) => `<button type="button" data-lang="${c}" aria-pressed="${c === state.lang}">${l}</button>`).join('');
+  const p = profile(), b = $('#settingsBtn');
+  b.hidden = !p;
+  if (p) b.textContent = p.name + ' · ' + t('settings');
+}
+function usedDays(p) { return [...new Set(p.series.filter(s => !s.once).map(s => s.day))].sort((a, b) => a - b); }
 function render() {
-  document.getElementById('tabs').innerHTML = TABS.map(t =>
-    `<button type="button" data-id="${t.id}" aria-pressed="${t.id === current}">${t.short}${t.id === todayId ? '<span class="today">сегодня</span>' : ''}</button>`
-  ).join('');
-  const day = DAYS.find(d => d.id === current);
-  document.getElementById('view').innerHTML = day ? renderDay(day) : renderWeek();
+  renderChrome();
+  const app = $('#app'), p = profile();
+  if (!p) { app.innerHTML = welcomeView(); return; }
+  if (!p.series.length) { app.innerHTML = toolbarHtml() + emptyView(); return; }
+  const days = usedDays(p);
+  if (tab !== 'week' && !days.includes(tab)) tab = days.includes(todayDow) ? todayDow : 'week';
+  const tabs = ['week', ...days];
+  const nav = `<nav class="tabs${days.length > 5 ? ' many' : ''}" style="--n:${days.length}" aria-label="${esc(t('week'))}">` +
+    tabs.map(id => {
+      const isT = id !== 'week' && id === todayDow;
+      return `<button type="button" data-tab="${id}" aria-pressed="${id === tab}" class="${isT ? 'is-today' : ''}">${id === 'week' ? esc(t('week')) : esc(dayName(id, 'short'))}${isT ? `<span class="today">${esc(t('today'))}</span>` : ''}</button>`;
+    }).join('') + '</nav>';
+  app.innerHTML = toolbarHtml() + nav + `<div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">${tab === 'week' ? weekView(p, days) : dayView(p, tab)}</div>`;
+}
+function toolbarHtml() {
+  return `<div class="toolbar" style="margin-bottom:20px"><button type="button" class="btn primary" data-act="import">${esc(t('importIcs'))}</button><button type="button" class="btn" data-act="add">${esc(t('addClass'))}</button></div>`;
+}
+function welcomeView() {
+  return `<section class="box hero" aria-labelledby="wt"><h2 id="wt">${esc(t('welcomeTitle'))}</h2><p>${esc(t('welcomeText'))}</p>
+    <form id="welcomeForm" class="sec" style="border:0;padding:0"><label class="f">${esc(t('nameLabel'))}<input class="in" id="wName" maxlength="40" autocomplete="off" placeholder="${esc(t('namePh'))}"></label>
+    <div class="toolbar"><button class="btn primary" type="submit">${esc(t('create'))}</button><button class="btn" type="button" data-act="example-new">${esc(t('tryExample'))}</button></div></form></section>`;
+}
+function emptyView() {
+  return `<section class="box hero"><h2>${esc(t('emptyTitle'))}</h2><p>${esc(t('emptyText'))}</p>
+    <div class="toolbar"><button class="btn primary" type="button" data-act="import">${esc(t('importIcs'))}</button><button class="btn" type="button" data-act="add">${esc(t('addClass'))}</button><button class="btn" type="button" data-act="example">${esc(t('tryExample'))}</button></div></section>`;
+}
+function kindOf(s) { return s.kind === 'sem' ? { cls: 'sem', label: t('seminar') } : { cls: 'lec', label: t('lecture') }; }
+function weekView(p, days) {
+  const reg = p.series.filter(s => !s.once);
+  const rows = [...new Set(reg.map(s => s.start + '|' + s.end))].sort();
+  let cells = '<span></span>' + days.map(d => `<span class="head">${esc(dayName(d, 'short'))}</span>`).join('');
+  rows.forEach(r => {
+    const [a, b] = r.split('|');
+    cells += `<div class="time"><b>${a}</b><span>${b}</span></div>`;
+    days.forEach(d => {
+      const items = reg.filter(s => s.day === d && s.start === a && s.end === b);
+      cells += items.length
+        ? `<div class="cellwrap">${items.map(s => {
+          const k = kindOf(s);
+          return `<button type="button" class="cell ${k.cls}${d === todayDow ? ' is-today' : ''}" data-edit="${esc(s.id)}" aria-label="${esc(dayName(d, 'long') + ', ' + a + ': ' + s.title)}">
+            <span class="abbr">${esc(abbr(s.title))}${s.every > 1 ? '<span class="half" title="' + esc(freqLabel(s)) + '">' + (s.every === 2 ? '½' : '1/' + s.every) + '</span>' : ''}</span>
+            <small><b>${esc(k.label)}</b>${s.room ? '<br>' + esc(s.room) : ''}</small></button>`;
+        }).join('')}</div>`
+        : '<div class="cell empty" aria-hidden="true"></div>';
+    });
+  });
+  const subjects = [...new Map(p.series.map(s => [s.title, abbr(s.title)])).entries()];
+  const once = p.series.filter(s => s.once).sort((a, b) => a.once.localeCompare(b.once) || a.start.localeCompare(b.start));
+  return `<section class="box grid-scroll" aria-label="${esc(t('week'))}"><div class="grid" style="--n:${days.length}">${cells}</div></section>
+    <div class="row">
+      <section class="box wide"><h2 class="bar sem">${esc(t('subjects'))}</h2><div class="list">${subjects.map(([n, a]) => `<div><b>${esc(a)}</b><span>${esc(n)}</span></div>`).join('')}</div></section>
+      <section class="box"><h2 class="bar lec">${esc(t('legend'))}</h2><div class="list">
+        <div><span class="sw lec"></span>${esc(t('lecture'))}</div><div><span class="sw sem"></span>${esc(t('seminar'))}</div>
+        <div><span class="half">½</span>${esc(t('biweekly'))}</div></div></section>
+    </div>` +
+    (once.length ? `<section class="box"><h2 class="bar lec">${esc(t('oneTimeTitle'))}</h2>${once.map(s => `<div class="once-row"><span>${esc(dateLabel(s.once))} · ${s.start}–${s.end}</span><span class="grow">${esc(s.title)}${s.room ? ' · ' + esc(s.room) : ''}</span><button type="button" class="btn small" data-edit="${esc(s.id)}">${esc(t('edit'))}</button></div>`).join('')}</section>` : '');
+}
+function dayView(p, d) {
+  const list = p.series.filter(s => !s.once && s.day === d).sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end));
+  const first = list[0], last = list.reduce((m, s) => (s.end > m ? s.end : m), '00:00');
+  const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+  const cards = list.map(s => {
+    const k = kindOf(s);
+    const live = d === todayDow && nowMin >= toMin(s.start) && nowMin < toMin(s.end);
+    return `<section class="box"><div class="bar ${k.cls}"><span>${esc(k.label)}</span><span>${s.start}–${s.end}</span></div>
+      <div class="card-body"><div class="card-main"><div class="card-title">${esc(s.title)}</div>
+        ${s.room ? `<div>${esc(s.room)}</div>` : ''}${s.teacher ? `<div>${esc(t('teacherPrefix'))}: ${esc(s.teacher)}</div>` : ''}</div>
+        <div class="tags">${live ? `<span class="tag now">${esc(t('now'))}</span>` : ''}<span class="tag${s.every > 1 ? ' b' : ''}">${esc(freqLabel(s))}</span>
+        <button type="button" class="btn small" data-edit="${esc(s.id)}">${esc(t('edit'))}</button></div></div></section>`;
+  }).join('');
+  const pic = PICS[(d - 1) % PICS.length];
+  return `<div class="day-head"><h2>${esc(dayName(d, 'long'))}${d === todayDow ? ' · ' + esc(t('today')) : ''}</h2><span>${esc(t('classes', list.length))} · ${first.start}–${last}</span></div>
+    <div class="cards">${cards}</div><div class="pic"><img src="${pic}" alt=""></div>`;
 }
 
-function go(id) {
-  current = id;
-  try { history.replaceState(null, '', '#' + current); } catch (_) {}
+/* ───────── dialogs ───────── */
+const dlg = $('#dlg');
+function openDialog(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); }
+function closeDialog() { if (dlg.open) dlg.close(); }
+function editDialog(id) {
+  const p = profile();
+  const s = id ? p.series.find(x => x.id === id) : { id: null, title: '', teacher: '', room: '', kind: 'lec', day: typeof tab === 'number' ? tab : (todayDow <= 5 ? todayDow : 1), start: '09:00', end: '10:30', every: 1, once: null };
+  const opt = (v, label, cur) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${esc(label)}</option>`;
+  const dayOpts = [1, 2, 3, 4, 5, 6, 7].map(d => opt(d, dayName(d, 'long'), s.day)).join('');
+  const repOpts = [1, 2, 3, 4].map(n => opt(n, n === 1 ? t('everyWeek') : n === 2 ? t('biweekly') : t('everyN', n), s.every)).join('');
+  openDialog(`<form id="editForm" class="dlg-body" data-id="${esc(s.id || '')}">
+    <h2 style="margin:0;font-size:20px">${esc(id ? t('editClass') : t('newClass'))}</h2>
+    <div class="fgrid">
+      <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" required></label>
+      <label class="f">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}"></label>
+      <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}"></label>
+      <label class="f">${esc(t('fType'))}<select class="in" name="kind">${opt('lec', t('lecture'), s.kind)}${opt('sem', t('seminar'), s.kind)}</select></label>
+      ${s.once
+        ? `<label class="f">${esc(t('fDate'))}<input class="in" type="date" name="date" value="${esc(s.once)}"></label>`
+        : `<label class="f">${esc(t('fDay'))}<select class="in" name="day">${dayOpts}</select></label>`}
+      <label class="f">${esc(t('fStart'))}<input class="in" type="time" name="start" value="${esc(s.start)}" required></label>
+      <label class="f">${esc(t('fEnd'))}<input class="in" type="time" name="end" value="${esc(s.end)}" required></label>
+      ${s.once ? '' : `<label class="f full">${esc(t('fRepeat'))}<select class="in" name="every">${repOpts}</select></label>`}
+    </div>
+    <p class="err" id="formErr" hidden></p>
+    <div class="dlg-actions">${id ? `<button type="button" class="btn danger" data-act="delete-class">${esc(t('del'))}</button>` : ''}<span class="spacer"></span>
+      <button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary">${esc(t('save'))}</button></div></form>`);
+}
+function settingsDialog() {
+  const p = profile();
+  openDialog(`<div class="dlg-body">
+    <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
+    <div class="sec"><label class="f">${esc(t('profileName'))}<input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}"></label>
+      <div class="toolbar"><button type="button" class="btn small" data-act="rename">${esc(t('rename'))}</button></div></div>
+    <div class="sec"><h3>${esc(t('profilesTitle'))}</h3><div class="profiles">${state.profiles.map(q => `<button type="button" class="btn small" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>
+      <div class="toolbar"><input class="in" id="newProfIn" maxlength="40" placeholder="${esc(t('namePh'))}" aria-label="${esc(t('newProfile'))}" style="flex:1 1 140px;width:auto"><button type="button" class="btn small" data-act="new-profile">${esc(t('newProfile'))}</button></div></div>
+    <div class="sec"><h3>${esc(t('backupTitle'))}</h3><div class="toolbar"><button type="button" class="btn small" data-act="export">${esc(t('exportBackup'))}</button><button type="button" class="btn small" data-act="restore">${esc(t('importBackup'))}</button></div></div>
+    <div class="sec"><button type="button" class="btn danger small" data-act="delete-profile">${esc(t('delProfile'))}</button></div>
+    <div class="dlg-actions"><button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
+}
+function chooseDialog(message, onReplace, onAdd) {
+  openDialog(`<div class="dlg-body"><p style="margin:0">${esc(message)}</p><div class="dlg-actions">
+    <button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="button" class="btn" id="chAdd">${esc(t('add'))}</button><button type="button" class="btn primary" id="chRep">${esc(t('replace'))}</button></div></div>`);
+  $('#chAdd').onclick = () => { closeDialog(); onAdd(); };
+  $('#chRep').onclick = () => { closeDialog(); onReplace(); };
+}
+
+/* ───────── actions ───────── */
+function applyImport(list, mode) {
+  const p = profile();
+  p.series = mode === 'replace' ? list : p.series.concat(list);
+  persist(); tab = null; render();
+  toast(t('imported', list.length));
+}
+async function handleIcs(file) {
+  if (!file) return;
+  let list = null;
+  try { list = importFromText(await file.text()); } catch (e) { list = null; }
+  if (list === null) { toast(t('importFailed')); return; }
+  if (!list.length) { toast(t('importNone')); return; }
+  const p = profile();
+  if (p.series.length) chooseDialog(t('replaceOrAdd'), () => applyImport(list, 'replace'), () => applyImport(list, 'add'));
+  else applyImport(list, 'replace');
+}
+function exportBackup() {
+  const p = profile();
+  const blob = new Blob([JSON.stringify({ daybook: 1, name: p.name, series: p.series }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daybook-' + p.name.replace(/[^\p{L}\p{N}_-]+/gu, '_') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const cleanSeries = s => ({
+  id: uid(), title: String(s.title || '—').slice(0, 120), teacher: String(s.teacher || '').slice(0, 80), room: String(s.room || '').slice(0, 80),
+  kind: s.kind === 'sem' ? 'sem' : 'lec', day: Math.min(7, Math.max(1, +s.day || 1)),
+  start: /^\d\d:\d\d$/.test(s.start) ? s.start : '09:00', end: /^\d\d:\d\d$/.test(s.end) ? s.end : '10:30',
+  every: Math.min(4, Math.max(1, +s.every || 1)), once: /^\d{4}-\d\d-\d\d$/.test(s.once || '') ? s.once : null
+});
+async function handleBackup(file) {
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (!data || data.daybook !== 1 || !Array.isArray(data.series)) throw new Error('shape');
+    newProfile(String(data.name || '').slice(0, 40), data.series.slice(0, 500).map(cleanSeries));
+    closeDialog(); tab = null; render(); toast(t('backupRestored'));
+  } catch (e) { toast(t('backupInvalid')); }
+}
+
+/* ───────── events ───────── */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-lang],[data-tab],[data-edit],[data-act],[data-switch]');
+  if (!el) return;
+  if (el.dataset.lang) { state.lang = el.dataset.lang; persist(); render(); return; }
+  if (el.dataset.tab) { tab = el.dataset.tab === 'week' ? 'week' : +el.dataset.tab; try { history.replaceState(null, '', '#' + (tab === 'week' ? 'week' : TAB_IDS[tab - 1])); } catch (_) {} render(); return; }
+  if (el.dataset.edit) { editDialog(el.dataset.edit); return; }
+  if (el.dataset.switch) { state.current = el.dataset.switch; persist(); tab = null; closeDialog(); render(); return; }
+  const a = el.dataset.act;
+  if (a === 'import') $('#icsInput').click();
+  else if (a === 'add') editDialog(null);
+  else if (a === 'close') closeDialog();
+  else if (a === 'example-new') { newProfile(t('exampleName'), exampleSeries()); tab = null; render(); }
+  else if (a === 'example') { profile().series = exampleSeries(); persist(); tab = null; render(); }
+  else if (a === 'rename') { const v = $('#renameIn').value.trim(); if (v) { profile().name = v.slice(0, 40); persist(); render(); settingsDialog(); toast(t('saved')); } }
+  else if (a === 'new-profile') { newProfile($('#newProfIn').value); tab = null; closeDialog(); render(); }
+  else if (a === 'export') exportBackup();
+  else if (a === 'restore') $('#backupInput').click();
+  else if (a === 'delete-class') {
+    if (!el.classList.contains('sure')) { el.classList.add('sure'); el.textContent = t('delSure'); return; }
+    const p = profile(), id = $('#editForm').dataset.id;
+    p.series = p.series.filter(s => s.id !== id); persist(); closeDialog(); render(); toast(t('deleted'));
+  } else if (a === 'delete-profile') {
+    if (!el.classList.contains('sure')) { el.classList.add('sure'); el.textContent = t('delProfileSure'); return; }
+    state.profiles = state.profiles.filter(q => q.id !== state.current);
+    state.current = state.profiles[0]?.id || null; persist(); tab = null; closeDialog(); render();
+  }
+});
+$('#settingsBtn').addEventListener('click', settingsDialog);
+$('#icsInput').addEventListener('change', e => { handleIcs(e.target.files[0]); e.target.value = ''; });
+$('#backupInput').addEventListener('change', e => { handleBackup(e.target.files[0]); e.target.value = ''; });
+document.addEventListener('submit', e => {
+  if (e.target.id === 'welcomeForm') { e.preventDefault(); newProfile($('#wName').value); tab = null; render(); return; }
+  if (e.target.id !== 'editForm') return;
+  e.preventDefault();
+  const f = new FormData(e.target), id = e.target.dataset.id, p = profile();
+  const err = m => { const el = $('#formErr'); el.textContent = m; el.hidden = false; };
+  const title = String(f.get('title') || '').trim();
+  if (!title) return err(t('errTitle'));
+  const start = f.get('start'), end = f.get('end');
+  if (!start || !end || end <= start) return err(t('errTime'));
+  const cur = id ? p.series.find(s => s.id === id) : null;
+  const next = Object.assign(cur || { id: uid(), once: null, every: 1, day: 1 }, {
+    title, teacher: String(f.get('teacher') || '').trim(), room: String(f.get('room') || '').trim(), kind: f.get('kind') === 'sem' ? 'sem' : 'lec', start, end
+  });
+  if (next.once) {
+    const d = f.get('date'); if (!d) return err(t('errDate'));
+    next.once = d; next.day = dowOf(new Date(d + 'T00:00'));
+  } else { next.day = +f.get('day') || 1; next.every = +f.get('every') || 1; }
+  if (!cur) p.series.push(next);
+  persist(); closeDialog(); render(); toast(t('saved'));
+});
+dlg.addEventListener('close', () => { dlg.innerHTML = ''; });
+
+/* ───────── start ───────── */
+(function init() {
+  const h = location.hash.slice(1);
+  if (h === 'week') tab = 'week';
+  else if (TAB_IDS.includes(h)) tab = TAB_IDS.indexOf(h) + 1;
+  else tab = todayDow <= 7 ? todayDow : 'week';
   render();
-}
-
-document.getElementById('tabs').addEventListener('click', e => {
-  const b = e.target.closest('button');
-  if (b) go(b.dataset.id);
-});
-
-document.getElementById('view').addEventListener('click', e => {
-  const b = e.target.closest('[data-go]');
-  if (!b) return;
-  go(b.dataset.go);
-  document.getElementById('tabs').scrollIntoView({ block: 'start' });
-});
-
-render();
+})();
 </script>
 </body>
 </html>
