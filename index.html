@@ -152,6 +152,7 @@
   .row-btn:hover { background: rgba(27, 26, 51, 0.06); }
   .row-btn[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); padding: 0 10px; }
   .linkbtn { border: 0; background: none; padding: 0; min-height: 44px; font: 600 14px var(--font); color: var(--danger); text-decoration: underline; cursor: pointer; }
+  .reckey { font: 500 17px/1.5 'IBM Plex Mono', ui-monospace, Menlo, monospace; padding: 12px; border: 2px dashed var(--ink); background: var(--field); word-break: break-all; user-select: all; }
   .linkbtn.sure { background: var(--danger); color: var(--lec-ink); padding: 0 12px; text-decoration: none; }
   .sec { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 2px solid var(--line); }
   .sec:first-child { padding-top: 0; border-top: 0; }
@@ -221,7 +222,16 @@ const I18N = {
     fTitle: 'Class name', fAbbr: 'Short name', fTeacher: 'Teacher', fRoom: 'Room', fType: 'Type', fDay: 'Day', fDate: 'Date', fStart: 'Start', fEnd: 'End', fRepeat: 'Repeats',
     save: 'Save', cancel: 'Cancel', close: 'Close', del: 'Delete', delSure: 'Delete for sure?',
     settings: 'Profile', profileName: 'Profile name', rename: 'Save name', profilesTitle: 'Profiles', newProfile: 'New profile',
-    backupTitle: 'Backup', calendarTitle: 'Calendar', exportBackup: 'Download backup', importBackup: 'Restore from backup',
+    backupTitle: 'Backup', calendarTitle: 'Calendar',
+    acctEntry: 'Sign in or create account', acctSignIn: 'Sign in', acctCreate: 'Create account', acctEmail: 'Email', acctPassword: 'Password',
+    acctNew: 'Create an account', acctHave: 'I have an account', acctForgot: 'Forgot password?', acctOut: 'Sign out',
+    acctPwShort: 'Password must be at least 8 characters.', acctBadLogin: 'Wrong email or password.',
+    acctConfirm: 'Check your email to confirm the account, then sign in.', acctResetSent: 'If this address is registered, a reset link is on its way.', acctNeedEmail: 'Enter your email first.',
+    cloudNote: 'Your timetable is encrypted in your browser before it is sent. The site owner cannot read it.',
+    privacyCloud: 'Your timetable is encrypted on your device and synced to your account. The site owner cannot read it.',
+    syncOk: 'synced', syncing: 'syncing…', syncErr: 'not synced', syncConflict: 'Updated from another device.',
+    recTitle: 'Your recovery key', recText: 'Your timetable is encrypted with your password. If you ever forget the password, only this key can unlock it. Save it somewhere safe. It is shown only once.',
+    recCopy: 'Copy', recCopied: 'Copied', recDone: 'I saved it', recEnter: 'Recovery key', recSet: 'Unlock and save', recBad: 'This recovery key does not match.', newPassword: 'New password', recAsk: 'Enter the recovery key to unlock your timetable.', exportBackup: 'Download backup', importBackup: 'Restore from backup',
     delProfile: 'Delete this profile', delProfileSure: 'Delete profile and all its classes?',
     imported: { one: 'Imported {n} class', other: 'Imported {n} classes' },
     importFailed: 'This file could not be read as a calendar.', importNone: 'No classes found in this file.',
@@ -245,7 +255,16 @@ const I18N = {
     fTitle: 'Name', fAbbr: 'Kürzel', fTeacher: 'Dozent/in', fRoom: 'Raum', fType: 'Art', fDay: 'Tag', fDate: 'Datum', fStart: 'Beginn', fEnd: 'Ende', fRepeat: 'Wiederholung',
     save: 'Speichern', cancel: 'Abbrechen', close: 'Schließen', del: 'Löschen', delSure: 'Wirklich löschen?',
     settings: 'Profil', profileName: 'Profilname', rename: 'Name speichern', profilesTitle: 'Profile', newProfile: 'Neues Profil',
-    backupTitle: 'Sicherung', calendarTitle: 'Kalender', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
+    backupTitle: 'Sicherung', calendarTitle: 'Kalender',
+    acctEntry: 'Anmelden oder Konto erstellen', acctSignIn: 'Anmelden', acctCreate: 'Konto erstellen', acctEmail: 'E-Mail', acctPassword: 'Passwort',
+    acctNew: 'Konto erstellen', acctHave: 'Ich habe ein Konto', acctForgot: 'Passwort vergessen?', acctOut: 'Abmelden',
+    acctPwShort: 'Das Passwort braucht mindestens 8 Zeichen.', acctBadLogin: 'E-Mail oder Passwort falsch.',
+    acctConfirm: 'Bestätige das Konto über die E-Mail und melde dich dann an.', acctResetSent: 'Wenn diese Adresse registriert ist, ist ein Link zum Zurücksetzen unterwegs.', acctNeedEmail: 'Gib zuerst deine E-Mail ein.',
+    cloudNote: 'Dein Stundenplan wird im Browser verschlüsselt, bevor er gesendet wird. Der Betreiber der Seite kann ihn nicht lesen.',
+    privacyCloud: 'Dein Stundenplan wird auf deinem Gerät verschlüsselt und mit deinem Konto synchronisiert. Der Betreiber der Seite kann ihn nicht lesen.',
+    syncOk: 'synchronisiert', syncing: 'synchronisiert…', syncErr: 'nicht synchronisiert', syncConflict: 'Von einem anderen Gerät aktualisiert.',
+    recTitle: 'Dein Wiederherstellungsschlüssel', recText: 'Dein Stundenplan ist mit deinem Passwort verschlüsselt. Falls du das Passwort vergisst, kann nur dieser Schlüssel ihn entsperren. Bewahre ihn sicher auf. Er wird nur einmal angezeigt.',
+    recCopy: 'Kopieren', recCopied: 'Kopiert', recDone: 'Ich habe ihn gesichert', recEnter: 'Wiederherstellungsschlüssel', recSet: 'Entsperren und speichern', recBad: 'Dieser Wiederherstellungsschlüssel passt nicht.', newPassword: 'Neues Passwort', recAsk: 'Gib den Wiederherstellungsschlüssel ein, um deinen Stundenplan zu entsperren.', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
     delProfile: 'Dieses Profil löschen', delProfileSure: 'Profil mit allen Veranstaltungen löschen?',
     imported: { one: '{n} Veranstaltung importiert', other: '{n} Veranstaltungen importiert' },
     importFailed: 'Diese Datei konnte nicht als Kalender gelesen werden.', importNone: 'In dieser Datei wurden keine Veranstaltungen gefunden.',
@@ -269,7 +288,16 @@ const I18N = {
     fTitle: 'Название', fAbbr: 'Сокращение', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', del: 'Удалить', delSure: 'Точно удалить?',
     settings: 'Профиль', profileName: 'Имя профиля', rename: 'Сохранить имя', profilesTitle: 'Профили', newProfile: 'Новый профиль',
-    backupTitle: 'Резервная копия', calendarTitle: 'Календарь', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
+    backupTitle: 'Резервная копия', calendarTitle: 'Календарь',
+    acctEntry: 'Войти или создать аккаунт', acctSignIn: 'Войти', acctCreate: 'Создать аккаунт', acctEmail: 'Почта', acctPassword: 'Пароль',
+    acctNew: 'Создать аккаунт', acctHave: 'У меня есть аккаунт', acctForgot: 'Забыли пароль?', acctOut: 'Выйти',
+    acctPwShort: 'Пароль должен быть не короче 8 символов.', acctBadLogin: 'Неверная почта или пароль.',
+    acctConfirm: 'Подтверди аккаунт по письму на почте, потом войди.', acctResetSent: 'Если этот адрес зарегистрирован, ссылка для сброса уже в пути.', acctNeedEmail: 'Сначала введи почту.',
+    cloudNote: 'Расписание шифруется в твоём браузере до отправки. Владелец сайта не может его прочитать.',
+    privacyCloud: 'Расписание шифруется на твоём устройстве и синхронизируется с аккаунтом. Владелец сайта не может его прочитать.',
+    syncOk: 'синхронизировано', syncing: 'синхронизация…', syncErr: 'не синхронизировано', syncConflict: 'Обновлено с другого устройства.',
+    recTitle: 'Твой ключ восстановления', recText: 'Расписание зашифровано твоим паролем. Если забудешь пароль, разблокировать его сможет только этот ключ. Сохрани его в надёжном месте. Он показывается один раз.',
+    recCopy: 'Копировать', recCopied: 'Скопировано', recDone: 'Я сохранил', recEnter: 'Ключ восстановления', recSet: 'Разблокировать и сохранить', recBad: 'Этот ключ восстановления не подходит.', newPassword: 'Новый пароль', recAsk: 'Введи ключ восстановления, чтобы разблокировать расписание.', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
     delProfile: 'Удалить этот профиль', delProfileSure: 'Удалить профиль и все занятия?',
     imported: { one: 'Загружено {n} занятие', few: 'Загружено {n} занятия', many: 'Загружено {n} занятий', other: 'Загружено {n} занятия' },
     importFailed: 'Не удалось прочитать этот файл как календарь.', importNone: 'В файле не нашлось занятий.',
@@ -296,6 +324,9 @@ const PICS = ['berlin.png', 'paris.png', 'london.png', 'bridge.png'];
 
 /* ───────── state & storage ───────── */
 const KEY = 'daybook:v1';
+// Public project URL and publishable key (safe in a browser: the table is protected by row-level security). Empty = accounts hidden.
+const SB = { url: 'https://ldvjktdpseonratqhmlj.supabase.co', key: 'sb_publishable_CS_m96uzBDMbMmAk09VNcA_5D6PAdk5' };
+const cloudOn = () => !!(SB.url && SB.key);
 let storageOk = true;
 function detectLang() {
   const l = (navigator.language || 'en').slice(0, 2).toLowerCase();
@@ -310,10 +341,11 @@ function loadState() {
 }
 let state = loadState();
 if (!I18N[state.lang]) state.lang = detectLang();
-function persist() {
+function quietSave() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
   catch (e) { storageOk = false; }
 }
+function persist() { quietSave(); scheduleSync(); }
 function profile() { return state.profiles.find(p => p.id === state.current) || null; }
 function t(key, n) {
   const dict = I18N[state.lang] || I18N.en;
@@ -577,7 +609,7 @@ function toast(msg) {
 }
 function renderChrome() {
   document.documentElement.lang = state.lang;
-  $('#privacy').textContent = t('privacy') + (storageOk ? '' : ' ' + t('storageWarn'));
+  $('#privacy').textContent = t(profile() && profile().cloud ? 'privacyCloud' : 'privacy') + (storageOk ? '' : ' ' + t('storageWarn'));
   $('#lang').innerHTML = LANGS.map(([c, l]) => `<button type="button" data-lang="${c}" aria-pressed="${c === state.lang}">${l}</button>`).join('');
   const p = profile(), b = $('#settingsBtn');
   b.hidden = !p;
@@ -605,7 +637,7 @@ function addBtnHtml() {
 function welcomeView() {
   return `<section class="box hero" aria-labelledby="wt"><h2 id="wt">${esc(t('welcomeTitle'))}</h2><p>${esc(t('welcomeText'))}</p>
     <form id="welcomeForm" class="sec" style="border:0;padding:0"><label class="f">${esc(t('nameLabel'))}<input class="in" id="wName" maxlength="40" autocomplete="off" placeholder="${esc(t('namePh'))}"></label>
-    <div class="toolbar"><button class="btn primary" type="submit">${esc(t('create'))}</button><button class="btn" type="button" data-act="example-new">${esc(t('tryExample'))}</button></div></form></section>`;
+    <div class="toolbar"><button class="btn primary" type="submit">${esc(t('create'))}</button><button class="btn" type="button" data-act="example-new">${esc(t('tryExample'))}</button>${cloudOn() ? `<button class="btn" type="button" data-act="account">${esc(t('acctEntry'))}</button>` : ''}</div></form></section>`;
 }
 function emptyView() {
   return `<section class="box hero"><h2>${esc(t('emptyTitle'))}</h2><p>${esc(t('emptyText'))}</p>
@@ -692,14 +724,15 @@ function editDialog(id) {
       <button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary">${esc(t('save'))}</button></div></form>`);
 }
 function settingsDialog(focusName) {
-  const p = profile();
+  const p = profile(), signed = !!(state.acct && p.cloud);
   const row = (act, label) => `<button type="button" class="row-btn" data-act="${act}">${esc(label)}</button>`;
   openDialog(`<div class="dlg-body">
     <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
     <input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}" aria-label="${esc(t('profileName'))}">
+    ${signed ? `<p class="note" style="margin:0">${esc(state.acct.email)} · <span id="syncLbl">${esc(syncLabel())}</span></p>` : ''}
     ${state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
-    <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${row('new-profile', t('newProfile'))}</div>
-    <div class="dlg-actions"><button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button><span class="spacer"></span>
+    <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${row('new-profile', t('newProfile'))}${cloudOn() && !signed ? row('account', t('acctEntry')) : ''}${signed ? row('signout', t('acctOut')) : ''}</div>
+    <div class="dlg-actions">${signed ? '' : `<button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button>`}<span class="spacer"></span>
       <button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
   if (focusName) { const el = $('#renameIn'); el.focus(); el.select(); }
 }
@@ -770,6 +803,11 @@ document.addEventListener('click', e => {
   else if (a === 'new-profile') { newProfile(t('defaultName')); tab = null; render(); settingsDialog(true); }
   else if (a === 'export') exportBackup();
   else if (a === 'restore') $('#backupInput').click();
+  else if (a === 'account') accountDialog('in');
+  else if (a === 'acct-switch') accountDialog(el.dataset.mode);
+  else if (a === 'forgot') forgotPassword();
+  else if (a === 'signout') signOut();
+  else if (a === 'copy-rec') copyRecovery();
   else if (a === 'delete-class') {
     if (!el.classList.contains('sure')) { el.classList.add('sure'); el.textContent = t('delSure'); return; }
     const p = profile(), id = $('#editForm').dataset.id;
@@ -789,6 +827,8 @@ document.addEventListener('change', e => {
 $('#icsInput').addEventListener('change', e => { handleIcs(e.target.files[0]); e.target.value = ''; });
 $('#backupInput').addEventListener('change', e => { handleBackup(e.target.files[0]); e.target.value = ''; });
 document.addEventListener('submit', e => {
+  if (e.target.id === 'acctForm') { e.preventDefault(); submitAccount(e.target); return; }
+  if (e.target.id === 'recForm') { e.preventDefault(); submitRecovery(e.target); return; }
   if (e.target.id === 'welcomeForm') { e.preventDefault(); newProfile($('#wName').value); tab = null; render(); return; }
   if (e.target.id !== 'editForm') return;
   e.preventDefault();
@@ -811,7 +851,245 @@ document.addEventListener('submit', e => {
   else p.series.forEach(x => { if (x !== cur && x.title === oldTitle) x.abbr = next.abbr; }); // same subject, same short name
   persist(); closeDialog(); render(); toast(t('saved'));
 });
-dlg.addEventListener('close', () => { if (!dlg.open) dlg.innerHTML = ''; });
+dlg.addEventListener('close', () => { if (!dlg.open) { dlg.innerHTML = ''; dlg.dataset.lock = ''; } });
+dlg.addEventListener('cancel', e => { if (dlg.dataset.lock) e.preventDefault(); });
+
+
+/* ───────── accounts: end-to-end encrypted sync (Supabase REST, no library) ─────────
+   The data key (DEK) is random. It is wrapped twice: by a key derived from the password and by a key derived
+   from a recovery key shown once. The server only ever sees the wrapped keys and the encrypted timetable. */
+const enc = new TextEncoder(), dec = new TextDecoder();
+const b64 = buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const PW_ITER = 600000, REC_ITER = 100000;
+async function kdf(secret, saltB64, iter) {
+  const base = await crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: unb64(saltB64), iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function seal(key, bytes) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return b64(out);
+}
+async function unseal(key, s) {
+  const raw = unb64(s);
+  return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, key, raw.slice(12)));
+}
+const importDEK = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+const newSalt = () => b64(crypto.getRandomValues(new Uint8Array(16)));
+const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+function newRecoveryKey() {
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  let bits = '', out = '';
+  bytes.forEach(b => { bits += b.toString(2).padStart(8, '0'); });
+  for (let i = 0; i < bits.length; i += 5) out += B32[parseInt(bits.slice(i, i + 5), 2)];
+  return out.match(/.{4}/g).join('-');
+}
+const normRec = r => String(r).toUpperCase().replace(/[^A-Z2-7]/g, '');
+const dataOf = p => JSON.stringify({ name: p.name, series: p.series });
+const hashOf = str => { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return h; };
+const normSeries = x => Object.assign(cleanSeries(x), { id: String(x.id || uid()) });
+const cloudProfile = () => state.profiles.find(p => p.cloud) || null;
+
+async function makeVault(password, plain) {
+  const dekRaw = crypto.getRandomValues(new Uint8Array(32));
+  const salt = newSalt(), recSalt = newSalt(), rec = newRecoveryKey();
+  const [kekPw, kekRec, dek] = await Promise.all([kdf(password, salt, PW_ITER), kdf(normRec(rec), recSalt, REC_ITER), importDEK(dekRaw)]);
+  return {
+    rec, dekRaw,
+    row: { salt, rec_salt: recSalt, wrapped_pw: await seal(kekPw, dekRaw), wrapped_rec: await seal(kekRec, dekRaw), data: await seal(dek, enc.encode(JSON.stringify(plain))) }
+  };
+}
+async function decryptRow(row, dekRaw) { return JSON.parse(dec.decode(await unseal(await importDEK(dekRaw), row.data))); }
+
+async function api(path, o = {}) {
+  if (o.auth && state.acct) await ensureToken();
+  const headers = Object.assign({ apikey: SB.key, 'Content-Type': 'application/json' }, o.headers || {});
+  const tok = o.token || (o.auth && state.acct ? state.acct.access : null);
+  if (tok) headers.Authorization = 'Bearer ' + tok;
+  const r = await fetch(SB.url + path, { method: o.method || 'GET', headers, body: o.body ? JSON.stringify(o.body) : undefined });
+  const text = await r.text();
+  let json = null; try { json = text ? JSON.parse(text) : null; } catch (_) { /* not JSON */ }
+  if (!r.ok) {
+    const e = new Error((json && (json.msg || json.message || json.error_description || json.error)) || r.statusText);
+    e.status = r.status; throw e;
+  }
+  return json;
+}
+async function ensureToken() {
+  const a = state.acct;
+  if (a.exp - Date.now() / 1000 > 60) return;
+  const j = await api('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: a.refresh } });
+  a.access = j.access_token; a.refresh = j.refresh_token; a.exp = Math.floor(Date.now() / 1000) + (j.expires_in || 3600);
+  quietSave();
+}
+const sessionOf = (j, dek) => ({ email: j.user.email, uid: j.user.id, access: j.access_token, refresh: j.refresh_token, exp: Math.floor(Date.now() / 1000) + (j.expires_in || 3600), dek: dek || null });
+
+let syncState = 'ok', syncT = null, pushing = false;
+function syncLabel() { return t(syncState === 'syncing' ? 'syncing' : syncState === 'err' ? 'syncErr' : 'syncOk'); }
+function setSync(st) { syncState = st; const el = $('#syncLbl'); if (el) el.textContent = syncLabel(); }
+function scheduleSync() {
+  const p = cloudProfile();
+  if (!state.acct || !state.acct.dek || !p || hashOf(dataOf(p)) === p.sh) return;
+  setSync('syncing'); clearTimeout(syncT); syncT = setTimeout(push, 800);
+}
+async function push() {
+  const p = cloudProfile();
+  if (!p || !state.acct || !state.acct.dek || pushing) return;
+  const body = dataOf(p), sh = hashOf(body);
+  if (sh === p.sh) { setSync('ok'); return; }
+  pushing = true;
+  try {
+    const data = await seal(await importDEK(unb64(state.acct.dek)), enc.encode(body));
+    const res = await api(`/rest/v1/vault?user_id=eq.${state.acct.uid}&rev=eq.${p.rev}`, { method: 'PATCH', auth: true, headers: { Prefer: 'return=representation' }, body: { data, rev: p.rev + 1, updated_at: new Date().toISOString() } });
+    if (res && res.length) { p.rev += 1; p.sh = sh; quietSave(); setSync('ok'); }
+    else { await pull(true); toast(t('syncConflict')); }
+  } catch (e) { setSync('err'); }
+  finally { pushing = false; if (cloudProfile() && hashOf(dataOf(cloudProfile())) !== cloudProfile().sh && syncState !== 'err') scheduleSync(); }
+}
+async function pull(force) {
+  const p = cloudProfile();
+  if (!p || !state.acct || !state.acct.dek) return;
+  try {
+    const row = (await api('/rest/v1/vault?select=*', { auth: true }))[0];
+    if (!row || (!force && row.rev <= p.rev)) { setSync('ok'); return; }
+    if (!force && hashOf(dataOf(p)) !== p.sh) return;   // local edits are waiting to be sent
+    const plain = await decryptRow(row, unb64(state.acct.dek));
+    p.name = String(plain.name || p.name).slice(0, 40);
+    p.series = (plain.series || []).map(normSeries);
+    p.rev = row.rev; p.sh = hashOf(dataOf(p));
+    quietSave(); setSync('ok'); render();
+  } catch (e) { setSync('err'); }
+}
+function adoptCloud(plain, rev, convert) {
+  let p = convert;
+  if (!p) {
+    state.profiles = state.profiles.filter(q => !q.cloud);
+    p = { id: uid(), created: Date.now() };
+    state.profiles.push(p);
+  }
+  p.cloud = true; p.name = String(plain.name || t('defaultName')).slice(0, 40);
+  p.series = (plain.series || []).map(normSeries);
+  p.rev = rev; p.sh = hashOf(dataOf(p));
+  state.current = p.id;
+}
+
+function accountDialog(mode, msg) {
+  const up = mode === 'up';
+  openDialog(`<form id="acctForm" class="dlg-body" data-mode="${mode}" novalidate>
+    <h2 style="margin:0;font-size:20px">${esc(up ? t('acctCreate') : t('acctSignIn'))}</h2>
+    <label class="f">${esc(t('acctEmail'))}<input class="in" name="email" type="email" autocomplete="email" required></label>
+    <label class="f">${esc(t('acctPassword'))}<input class="in" name="password" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required></label>
+    ${up ? `<p class="note" style="margin:0">${esc(t('cloudNote'))}</p>` : ''}
+    <p class="err" id="formErr"${msg ? '' : ' hidden'}>${esc(msg || '')}</p>
+    <div class="menu"><button type="button" class="row-btn" data-act="acct-switch" data-mode="${up ? 'in' : 'up'}">${esc(up ? t('acctHave') : t('acctNew'))}</button>${up ? '' : `<button type="button" class="row-btn" data-act="forgot">${esc(t('acctForgot'))}</button>`}</div>
+    <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary" id="acctGo">${esc(up ? t('acctCreate') : t('acctSignIn'))}</button></div></form>`);
+}
+function recoveryKeyDialog(rec) {
+  dlg.dataset.lock = '1';
+  openDialog(`<div class="dlg-body"><h2 style="margin:0;font-size:20px">${esc(t('recTitle'))}</h2><p style="margin:0">${esc(t('recText'))}</p>
+    <div class="reckey" id="recKey">${esc(rec)}</div>
+    <div class="dlg-actions"><button type="button" class="btn" data-act="copy-rec">${esc(t('recCopy'))}</button><span class="spacer"></span><button type="button" class="btn primary" data-act="close">${esc(t('recDone'))}</button></div></div>`);
+}
+let pendingLogin = null, pendingReset = null;
+function recoveryDialog(kind, msg) {
+  dlg.dataset.lock = '';
+  openDialog(`<form id="recForm" class="dlg-body" data-kind="${kind}" novalidate><h2 style="margin:0;font-size:20px">${esc(t('recEnter'))}</h2><p style="margin:0">${esc(t('recAsk'))}</p>
+    ${kind === 'reset' ? `<label class="f">${esc(t('newPassword'))}<input class="in" name="password" type="password" autocomplete="new-password"></label>` : ''}
+    <label class="f">${esc(t('recEnter'))}<input class="in" name="rec" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></label>
+    <p class="err" id="formErr"${msg ? '' : ' hidden'}>${esc(msg || '')}</p>
+    <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary">${esc(t('recSet'))}</button></div></form>`);
+}
+async function finishLogin(sess, password) {
+  state.acct = sessionOf(sess);
+  const rows = await api('/rest/v1/vault?select=*', { auth: true });
+  const local = profile() && !profile().cloud ? profile() : null;
+  if (!rows.length) {   // first sign-in: create the encrypted vault from the local profile
+    const initial = local ? { name: local.name, series: local.series } : { name: sess.user.email.split('@')[0], series: [] };
+    const v = await makeVault(password, initial);
+    await api('/rest/v1/vault', { method: 'POST', auth: true, headers: { Prefer: 'return=minimal' }, body: Object.assign({ user_id: state.acct.uid, rev: 1 }, v.row) });
+    state.acct.dek = b64(v.dekRaw);
+    adoptCloud(initial, 1, local);
+    persist(); render(); recoveryKeyDialog(v.rec);
+    return;
+  }
+  const row = rows[0];
+  let dekRaw;
+  try { dekRaw = await unseal(await kdf(password, row.salt, PW_ITER), row.wrapped_pw); }
+  catch (e) { pendingLogin = { row, password }; recoveryDialog('login'); return; }   // password was reset elsewhere
+  await completeLogin(row, dekRaw);
+}
+async function completeLogin(row, dekRaw) {
+  state.acct.dek = b64(dekRaw);
+  adoptCloud(await decryptRow(row, dekRaw), row.rev, null);
+  persist(); closeDialog(); render();
+}
+async function submitAccount(form) {
+  const mode = form.dataset.mode, email = form.email.value.trim(), password = form.password.value;
+  const err = m => { const el = $('#formErr'); el.textContent = m; el.hidden = false; };
+  const go = $('#acctGo');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return err(t('acctEmail') + '?');
+  if (password.length < 8) return err(t('acctPwShort'));
+  go.disabled = true;
+  try {
+    let sess;
+    if (mode === 'up') {
+      sess = await api('/auth/v1/signup', { method: 'POST', body: { email, password } });
+      if (!sess.access_token) { accountDialog('in', t('acctConfirm')); return; }   // the project asks for email confirmation first
+    } else {
+      sess = await api('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
+    }
+    await finishLogin(sess, password);
+  } catch (e) {
+    state.acct = null;
+    err(mode === 'in' && (e.status === 400 || e.status === 401) ? t('acctBadLogin') : (e.message || String(e)));
+  } finally { go.disabled = false; }
+}
+async function submitRecovery(form) {
+  const kind = form.dataset.kind, rec = normRec(form.rec.value);
+  const err = m => { const el = $('#formErr'); el.textContent = m; el.hidden = false; };
+  try {
+    let row, password, token;
+    if (kind === 'login') { row = pendingLogin.row; password = pendingLogin.password; }
+    else {
+      token = pendingReset.token; password = form.password.value;
+      if (password.length < 8) return err(t('acctPwShort'));
+      row = (await api('/rest/v1/vault?select=*', { token }))[0];
+    }
+    let dekRaw;
+    try { dekRaw = await unseal(await kdf(rec, row.rec_salt, REC_ITER), row.wrapped_rec); }
+    catch (e) { return err(t('recBad')); }
+    if (kind === 'reset') {
+      const u = await api('/auth/v1/user', { method: 'PUT', token, body: { password } });
+      state.acct = sessionOf({ user: u, access_token: token, refresh_token: pendingReset.refresh, expires_in: pendingReset.expires });
+    }
+    const salt = newSalt();
+    await api(`/rest/v1/vault?user_id=eq.${state.acct.uid}`, { method: 'PATCH', auth: true, headers: { Prefer: 'return=minimal' }, body: { salt, wrapped_pw: await seal(await kdf(password, salt, PW_ITER), dekRaw) } });
+    pendingLogin = pendingReset = null;
+    await completeLogin(row, dekRaw);
+  } catch (e) { err(e.message || String(e)); }
+}
+async function signOut() {
+  try { await api('/auth/v1/logout', { method: 'POST', auth: true }); } catch (_) { /* the local sign-out below is what matters */ }
+  const p = cloudProfile();
+  if (p) { p.cloud = false; delete p.rev; delete p.sh; }
+  state.acct = null; quietSave(); closeDialog(); render();
+}
+async function forgotPassword() {
+  const email = ($('#acctForm').email.value || '').trim();
+  const el = $('#formErr');
+  if (!email) { el.textContent = t('acctNeedEmail'); el.hidden = false; return; }
+  try { await api('/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), { method: 'POST', body: { email } }); } catch (_) { /* same message either way */ }
+  el.textContent = t('acctResetSent'); el.hidden = false;
+}
+function copyRecovery() {
+  const text = $('#recKey').textContent;
+  const done = () => toast(t('recCopied'));
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => selectText($('#recKey')));
+  else selectText($('#recKey'));
+}
+function selectText(el) { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
 
 /* ───────── start ───────── */
 (function init() {
@@ -820,6 +1098,14 @@ dlg.addEventListener('close', () => { if (!dlg.open) dlg.innerHTML = ''; });
   else if (TAB_IDS.includes(h)) tab = TAB_IDS.indexOf(h) + 1;
   else tab = todayDow <= 7 ? todayDow : 'week';
   render();
+  // Password-reset link from the email: #access_token=…&type=recovery
+  const hp = new URLSearchParams(location.hash.slice(1));
+  if (cloudOn() && hp.get('type') === 'recovery' && hp.get('access_token')) {
+    pendingReset = { token: hp.get('access_token'), refresh: hp.get('refresh_token'), expires: +hp.get('expires_in') || 3600 };
+    try { history.replaceState(null, '', location.pathname); } catch (_) { /* keep the hash */ }
+    recoveryDialog('reset');
+  } else if (cloudOn() && state.acct) pull();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && cloudOn() && state.acct) pull(); });
 })();
 </script>
 </body>
