@@ -198,7 +198,7 @@ const I18N = {
     subjects: 'Subjects', legend: 'Key', lecture: 'Lecture', seminar: 'Seminar',
     biweekly: 'every 2 weeks', everyWeek: 'every week', everyN: 'every {n} weeks', oneTimeTitle: 'One-time events',
     edit: 'Edit', editClass: 'Edit class', newClass: 'New class',
-    fTitle: 'Class name', fTeacher: 'Teacher', fRoom: 'Room', fType: 'Type', fDay: 'Day', fDate: 'Date', fStart: 'Start', fEnd: 'End', fRepeat: 'Repeats',
+    fTitle: 'Class name', fAbbr: 'Short name', fTeacher: 'Teacher', fRoom: 'Room', fType: 'Type', fDay: 'Day', fDate: 'Date', fStart: 'Start', fEnd: 'End', fRepeat: 'Repeats',
     save: 'Save', cancel: 'Cancel', close: 'Close', del: 'Delete', delSure: 'Delete for sure?',
     settings: 'Profile', profileName: 'Profile name', rename: 'Save name', profilesTitle: 'Profiles', newProfile: 'New profile',
     backupTitle: 'Backup', exportBackup: 'Download backup', importBackup: 'Restore from backup',
@@ -222,7 +222,7 @@ const I18N = {
     subjects: 'Fächer', legend: 'Legende', lecture: 'Vorlesung', seminar: 'Übung',
     biweekly: 'alle 2 Wochen', everyWeek: 'jede Woche', everyN: 'alle {n} Wochen', oneTimeTitle: 'Einzeltermine',
     edit: 'Bearbeiten', editClass: 'Veranstaltung bearbeiten', newClass: 'Neue Veranstaltung',
-    fTitle: 'Name', fTeacher: 'Dozent/in', fRoom: 'Raum', fType: 'Art', fDay: 'Tag', fDate: 'Datum', fStart: 'Beginn', fEnd: 'Ende', fRepeat: 'Wiederholung',
+    fTitle: 'Name', fAbbr: 'Kürzel', fTeacher: 'Dozent/in', fRoom: 'Raum', fType: 'Art', fDay: 'Tag', fDate: 'Datum', fStart: 'Beginn', fEnd: 'Ende', fRepeat: 'Wiederholung',
     save: 'Speichern', cancel: 'Abbrechen', close: 'Schließen', del: 'Löschen', delSure: 'Wirklich löschen?',
     settings: 'Profil', profileName: 'Profilname', rename: 'Name speichern', profilesTitle: 'Profile', newProfile: 'Neues Profil',
     backupTitle: 'Sicherung', exportBackup: 'Sicherung herunterladen', importBackup: 'Aus Sicherung wiederherstellen',
@@ -246,7 +246,7 @@ const I18N = {
     subjects: 'Предметы', legend: 'Обозначения', lecture: 'Лекция', seminar: 'Семинар',
     biweekly: 'раз в 2 недели', everyWeek: 'каждую неделю', everyN: 'раз в {n} нед.', oneTimeTitle: 'Разовые события',
     edit: 'Изменить', editClass: 'Изменить занятие', newClass: 'Новое занятие',
-    fTitle: 'Название', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
+    fTitle: 'Название', fAbbr: 'Сокращение', fTeacher: 'Преподаватель', fRoom: 'Аудитория', fType: 'Тип', fDay: 'День', fDate: 'Дата', fStart: 'Начало', fEnd: 'Конец', fRepeat: 'Повтор',
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', del: 'Удалить', delSure: 'Точно удалить?',
     settings: 'Профиль', profileName: 'Имя профиля', rename: 'Сохранить имя', profilesTitle: 'Профили', newProfile: 'Новый профиль',
     backupTitle: 'Резервная копия', exportBackup: 'Скачать копию', importBackup: 'Восстановить из копии',
@@ -318,7 +318,8 @@ function freqLabel(s) {
   if (s.once) return dateLabel(s.once);
   return s.every === 1 ? t('everyWeek') : s.every === 2 ? t('biweekly') : t('everyN', s.every);
 }
-const STOP = new Set(['der', 'die', 'das', 'und', 'in', 'im', 'für', 'zur', 'zum', 'of', 'the', 'and', 'to', 'in', 'for', 'a', 'и', 'в', 'на', 'к', 'с', 'по', 'для', 'to']);
+const STOP = new Set(['die', 'das', 'und', 'in', 'im', 'für', 'zur', 'zum', 'of', 'the', 'and', 'to', 'in', 'for', 'a', 'и', 'в', 'на', 'к', 'с', 'по', 'для', 'to']);
+const shortOf = s => s.abbr || abbr(s.title);
 function abbr(title) {
   const words = title.replace(/[()\/,:;.\-–—]/g, ' ').split(/\s+/).filter(Boolean);
   const main = words.filter(w => !STOP.has(w.toLowerCase()));
@@ -604,13 +605,13 @@ function weekView(p, days) {
         ? `<div class="cellwrap">${items.map(s => {
           const k = kindOf(s);
           return `<button type="button" class="cell ${k.cls}${d === todayDow ? ' is-today' : ''}" data-edit="${esc(s.id)}" aria-label="${esc(dayName(d, 'long') + ', ' + a + ': ' + s.title)}">
-            <span class="abbr">${esc(abbr(s.title))}${s.every > 1 ? '<span class="half" title="' + esc(freqLabel(s)) + '">' + (s.every === 2 ? '½' : '1/' + s.every) + '</span>' : ''}</span>
+            <span class="abbr">${esc(shortOf(s))}${s.every > 1 ? '<span class="half" title="' + esc(freqLabel(s)) + '">' + (s.every === 2 ? '½' : '1/' + s.every) + '</span>' : ''}</span>
             <small><b>${esc(k.label)}</b>${s.room ? '<br>' + esc(s.room) : ''}</small></button>`;
         }).join('')}</div>`
         : '<div class="cell empty" aria-hidden="true"></div>';
     });
   });
-  const subjects = [...new Map(p.series.map(s => [s.title, abbr(s.title)])).entries()];
+  const subjects = [...new Map(p.series.map(s => [s.title, shortOf(s)])).entries()];
   const once = p.series.filter(s => s.once).sort((a, b) => a.once.localeCompare(b.once) || a.start.localeCompare(b.start));
   return `<section class="box grid-scroll" aria-label="${esc(t('week'))}"><div class="grid" style="--n:${days.length}">${cells}</div></section>
     <div class="row">
@@ -645,7 +646,7 @@ function openDialog(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal()
 function closeDialog() { if (dlg.open) dlg.close(); }
 function editDialog(id) {
   const p = profile();
-  const s = id ? p.series.find(x => x.id === id) : { id: null, title: '', teacher: '', room: '', kind: 'lec', day: typeof tab === 'number' ? tab : (todayDow <= 5 ? todayDow : 1), start: '09:00', end: '10:30', every: 1, once: null };
+  const s = id ? p.series.find(x => x.id === id) : { id: null, title: '', abbr: '', teacher: '', room: '', kind: 'lec', day: typeof tab === 'number' ? tab : (todayDow <= 5 ? todayDow : 1), start: '09:00', end: '10:30', every: 1, once: null };
   const opt = (v, label, cur) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${esc(label)}</option>`;
   const dayOpts = [1, 2, 3, 4, 5, 6, 7].map(d => opt(d, dayName(d, 'long'), s.day)).join('');
   const repOpts = [1, 2, 3, 4].map(n => opt(n, n === 1 ? t('everyWeek') : n === 2 ? t('biweekly') : t('everyN', n), s.every)).join('');
@@ -653,6 +654,7 @@ function editDialog(id) {
     <h2 style="margin:0;font-size:20px">${esc(id ? t('editClass') : t('newClass'))}</h2>
     <div class="fgrid">
       <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" required></label>
+      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(abbr(s.title))}" autocomplete="off"></label>
       <label class="f">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}"></label>
       <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}"></label>
       <label class="f">${esc(t('fType'))}<select class="in" name="kind">${opt('lec', t('lecture'), s.kind)}${opt('sem', t('seminar'), s.kind)}</select></label>
@@ -661,7 +663,7 @@ function editDialog(id) {
         : `<label class="f">${esc(t('fDay'))}<select class="in" name="day">${dayOpts}</select></label>`}
       <label class="f">${esc(t('fStart'))}<input class="in" type="time" name="start" value="${esc(s.start)}" required></label>
       <label class="f">${esc(t('fEnd'))}<input class="in" type="time" name="end" value="${esc(s.end)}" required></label>
-      ${s.once ? '' : `<label class="f full">${esc(t('fRepeat'))}<select class="in" name="every">${repOpts}</select></label>`}
+      ${s.once ? '' : `<label class="f">${esc(t('fRepeat'))}<select class="in" name="every">${repOpts}</select></label>`}
     </div>
     <p class="err" id="formErr" hidden></p>
     <div class="dlg-actions">${id ? `<button type="button" class="btn danger" data-act="delete-class">${esc(t('del'))}</button>` : ''}<span class="spacer"></span>
@@ -713,7 +715,7 @@ function exportBackup() {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 const cleanSeries = s => ({
-  id: uid(), title: String(s.title || '—').slice(0, 120), teacher: String(s.teacher || '').slice(0, 80), room: String(s.room || '').slice(0, 80),
+  id: uid(), title: String(s.title || '—').slice(0, 120), abbr: String(s.abbr || '').slice(0, 6), teacher: String(s.teacher || '').slice(0, 80), room: String(s.room || '').slice(0, 80),
   kind: s.kind === 'sem' ? 'sem' : 'lec', day: Math.min(7, Math.max(1, +s.day || 1)),
   start: /^\d\d:\d\d$/.test(s.start) ? s.start : '09:00', end: /^\d\d:\d\d$/.test(s.end) ? s.end : '10:30',
   every: Math.min(4, Math.max(1, +s.every || 1)), once: /^\d{4}-\d\d-\d\d$/.test(s.once || '') ? s.once : null
@@ -770,14 +772,16 @@ document.addEventListener('submit', e => {
   const start = f.get('start'), end = f.get('end');
   if (!start || !end || end <= start) return err(t('errTime'));
   const cur = id ? p.series.find(s => s.id === id) : null;
+  const oldTitle = cur ? cur.title : null;
   const next = Object.assign(cur || { id: uid(), once: null, every: 1, day: 1 }, {
-    title, teacher: String(f.get('teacher') || '').trim(), room: String(f.get('room') || '').trim(), kind: f.get('kind') === 'sem' ? 'sem' : 'lec', start, end
+    title, abbr: String(f.get('abbr') || '').trim().slice(0, 6), teacher: String(f.get('teacher') || '').trim(), room: String(f.get('room') || '').trim(), kind: f.get('kind') === 'sem' ? 'sem' : 'lec', start, end
   });
   if (next.once) {
     const d = f.get('date'); if (!d) return err(t('errDate'));
     next.once = d; next.day = dowOf(new Date(d + 'T00:00'));
   } else { next.day = +f.get('day') || 1; next.every = +f.get('every') || 1; }
   if (!cur) p.series.push(next);
+  else p.series.forEach(x => { if (x !== cur && x.title === oldTitle) x.abbr = next.abbr; }); // same subject, same short name
   persist(); closeDialog(); render(); toast(t('saved'));
 });
 dlg.addEventListener('close', () => { dlg.innerHTML = ''; });
