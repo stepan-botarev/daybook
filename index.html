@@ -768,7 +768,7 @@ function editDialog(id) {
       <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" autocapitalize="words" enterkeyhint="next" required></label>
       <label class="f full">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}" placeholder="Severus Snape" autocapitalize="words" enterkeyhint="next"></label>
       <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}" placeholder="1408" enterkeyhint="next"></label>
-      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : 'USSR')}" autocomplete="off" enterkeyhint="done"></label>
+      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : 'BDSM')}" autocomplete="off" enterkeyhint="done"></label>
       <label class="f">${esc(t('fType'))}<select class="in" name="kind">${opt('lec', t('lecture'), s.kind)}${opt('sem', t('seminar'), s.kind)}</select></label>
       ${s.once
         ? `<label class="f">${esc(t('fDate'))}<input class="in" type="date" name="date" value="${esc(s.once)}"></label>`
