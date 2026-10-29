@@ -787,7 +787,7 @@ function settingsDialog(focusName) {
   openDialog(`<div class="dlg-body">
     <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
     <input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}" aria-label="${esc(t('profileName'))}">
-    ${signed ? `<p class="note" style="margin:0">${esc(state.acct.email)} · <span id="syncLbl">${esc(syncLabel())}</span></p>` : ''}
+    ${signed ? `<p class="note" style="margin:0">${esc(state.acct.email)}<span id="syncLbl">${esc(syncLabel())}</span></p>` : ''}
     ${!signed && state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
     <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${cloudOn() && !signed ? row('account', t('acctEntry')) : ''}${signed ? row('signout', t('acctOut')) : ''}</div>
     <div class="dlg-actions">${signed ? '' : `<button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button>`}<span class="spacer"></span>
@@ -987,7 +987,7 @@ async function ensureToken() {
 const sessionOf = (j, dek) => ({ email: j.user.email, uid: j.user.id, access: j.access_token, refresh: j.refresh_token, exp: Math.floor(Date.now() / 1000) + (j.expires_in || 3600), dek: dek || null });
 
 let syncState = 'ok', syncT = null, pushing = false;
-function syncLabel() { return t(syncState === 'syncing' ? 'syncing' : syncState === 'err' ? 'syncErr' : 'syncOk'); }
+function syncLabel() { return syncState === 'syncing' ? ' · ' + t('syncing') : syncState === 'err' ? ' · ' + t('syncErr') : ''; }   // all quiet when everything is saved
 function setSync(st) { syncState = st; const el = $('#syncLbl'); if (el) el.textContent = syncLabel(); }
 function scheduleSync() {
   const p = cloudProfile();
