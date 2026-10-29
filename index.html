@@ -164,10 +164,23 @@
   .fgrid .full { grid-column: 1 / -1; }
   dialog { border: 3px solid var(--ink); background: var(--panel); color: var(--ink); padding: 0; width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; }
   dialog:focus { outline: none; }
+  /* phone: dialogs become a bottom sheet that rides above the keyboard */
+  @media (max-width: 600px) {
+    dialog { inset: auto 0 var(--vvb, 0px) 0; margin: 0; width: 100%; max-width: 100%; max-height: calc(var(--vvh, 100dvh) - 12px); border-width: 3px 0 0; }
+    .dlg-body { padding: 16px; gap: 14px; }
+    .fgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
+    label.f { gap: 6px; font-size: 13px; }
+    .btn.dlg-x { display: inline-flex; align-items: center; justify-content: center; width: 40px; min-height: 40px; padding: 0; }
+    .dlg-actions.sticky { margin: 0 -16px -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+  }
   dialog::backdrop { background: rgba(27, 26, 51, 0.55); }
   .dlg-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
   .dlg-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
   .dlg-actions .spacer { flex: 1 1 auto; }
+  .dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .dlg-head h2 { margin: 0; font-size: 20px; }
+  .dlg-x { display: none; }
+  .dlg-actions.sticky { position: sticky; bottom: 0; background: var(--panel); border-top: 2px solid var(--ink); margin: 0 -24px -24px; padding: 12px 24px; }
   .menu { display: flex; flex-direction: column; }
   .row-btn { text-align: left; background: none; border: 0; border-top: 2px solid var(--line); padding: 0 2px; min-height: 46px; font: 600 15px var(--font); cursor: pointer; }
   .row-btn:hover { background: rgba(27, 26, 51, 0.06); }
@@ -209,7 +222,6 @@
     .day-head h2 { font-size: 24px; }
     .addbtn { width: 48px; padding: 0; }
     .addbtn .lbl { display: none; }
-    .fgrid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -650,6 +662,7 @@ function renderChrome() {
   const at = $('#addTop'); at.hidden = !p; if (p) { at.innerHTML = PLUS; at.title = t('addClass'); at.setAttribute('aria-label', t('addClass')); }
   if (p) { b.innerHTML = GEAR; b.title = t('settings'); b.setAttribute('aria-label', t('settings')); }
 }
+const CROSS = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>';
 const PLUS = '<svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>';
 const GEAR = '<svg viewBox="0 0 12 12" width="24" height="24" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M5 0h2v1h-2zM1 1h2v1h-2zM5 1h2v1h-2zM9 1h2v1h-2zM1 2h10v1h-10zM2 3h8v1h-8zM2 4h3v1h-3zM7 4h3v1h-3zM0 5h4v1h-4zM8 5h4v1h-4zM0 6h4v1h-4zM8 6h4v1h-4zM2 7h3v1h-3zM7 7h3v1h-3zM2 8h8v1h-8zM1 9h10v1h-10zM1 10h2v1h-2zM5 10h2v1h-2zM9 10h2v1h-2zM5 11h2v1h-2z"/></svg>';
 function usedDays(p) { return [...new Set(p.series.filter(s => !s.once).map(s => s.day))].sort((a, b) => a - b); }
@@ -733,6 +746,14 @@ function dayView(p, d) {
 
 /* ───────── dialogs ───────── */
 const dlg = $('#dlg');
+
+// keep the bottom sheet above the on-screen keyboard and the active field in view
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const fit = () => { dlg.style.setProperty('--vvh', vv.height + 'px'); dlg.style.setProperty('--vvb', Math.max(0, innerHeight - vv.height - vv.offsetTop) + 'px'); };
+  vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); fit();
+}
+dlg.addEventListener('focusin', e => { if (e.target.matches('input, select, textarea')) setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300); });
 function openDialog(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); dlg.focus({ preventScroll: true }); }   // no field grabs focus until the user clicks it
 function closeDialog() { if (dlg.open) dlg.close(); }
 function editDialog(id) {
@@ -742,22 +763,22 @@ function editDialog(id) {
   const dayOpts = [1, 2, 3, 4, 5, 6, 7].map(d => opt(d, dayName(d, 'long'), s.day)).join('');
   const repOpts = [1, 2, 3, 4].map(n => opt(n, n === 1 ? t('everyWeek') : n === 2 ? t('biweekly') : t('everyN', n), s.every)).join('');
   openDialog(`<form id="editForm" class="dlg-body" data-id="${esc(s.id || '')}">
-    <h2 style="margin:0;font-size:20px">${esc(id ? t('editClass') : t('newClass'))}</h2>
+    <div class="dlg-head"><h2>${esc(id ? t('editClass') : t('newClass'))}</h2><button type="button" class="btn icon dlg-x" data-act="close" aria-label="${esc(t('close'))}">${CROSS}</button></div>
     <div class="fgrid">
-      <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" required></label>
-      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : 'USSR')}" autocomplete="off"></label>
-      <label class="f">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}" placeholder="Severus Snape"></label>
-      <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}" placeholder="1408"></label>
+      <label class="f full">${esc(t('fTitle'))}<input class="in" name="title" maxlength="120" value="${esc(s.title)}" autocapitalize="words" enterkeyhint="next" required></label>
+      <label class="f full">${esc(t('fTeacher'))}<input class="in" name="teacher" maxlength="80" value="${esc(s.teacher)}" placeholder="Severus Snape" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="f">${esc(t('fRoom'))}<input class="in" name="room" maxlength="80" value="${esc(s.room)}" placeholder="1408" enterkeyhint="next"></label>
+      <label class="f">${esc(t('fAbbr'))}<input class="in" name="abbr" maxlength="6" value="${esc(s.abbr || '')}" placeholder="${esc(s.title ? abbr(s.title) : 'USSR')}" autocomplete="off" enterkeyhint="done"></label>
       <label class="f">${esc(t('fType'))}<select class="in" name="kind">${opt('lec', t('lecture'), s.kind)}${opt('sem', t('seminar'), s.kind)}</select></label>
       ${s.once
         ? `<label class="f">${esc(t('fDate'))}<input class="in" type="date" name="date" value="${esc(s.once)}"></label>`
         : `<label class="f">${esc(t('fDay'))}<select class="in" name="day">${dayOpts}</select></label>`}
       <label class="f">${esc(t('fStart'))}<input class="in" type="time" name="start" value="${esc(s.start)}" required></label>
       <label class="f">${esc(t('fEnd'))}<input class="in" type="time" name="end" value="${esc(s.end)}" required></label>
-      ${s.once ? '' : `<label class="f">${esc(t('fRepeat'))}<select class="in" name="every">${repOpts}</select></label>`}
+      ${s.once ? '' : `<label class="f full">${esc(t('fRepeat'))}<select class="in" name="every">${repOpts}</select></label>`}
     </div>
     <p class="err" id="formErr" hidden></p>
-    <div class="dlg-actions">${id ? `<button type="button" class="btn danger" data-act="delete-class">${esc(t('del'))}</button>` : ''}<span class="spacer"></span>
+    <div class="dlg-actions sticky">${id ? `<button type="button" class="btn danger" data-act="delete-class">${esc(t('del'))}</button>` : ''}<span class="spacer"></span>
       <button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary">${esc(t('save'))}</button></div></form>`);
 }
 function settingsDialog(focusName) {
