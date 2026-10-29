@@ -211,8 +211,8 @@ const I18N = {
   en: {
     privacy: 'Your timetable is stored only in this browser. No data is collected.',
     welcomeTitle: 'Make your timetable',
-    welcomeText: 'Create a profile, then import an .ics file from your university calendar.',
-    nameLabel: 'Profile name', namePh: 'e.g. Anna', create: 'Create profile', tryExample: 'Try an example',
+    welcomeText: 'Create an account, then import an .ics file from your university calendar.',
+    nameLabel: 'Profile name', namePh: 'e.g. Anna', create: 'Create profile', tryExample: 'Take a look',
     emptyTitle: 'No classes yet', emptyText: 'Import an .ics file from your university calendar.',
     importIcs: 'Import .ics', addClass: 'Add class', week: 'Week', today: 'today', now: 'now',
     classes: { one: '{n} class', other: '{n} classes' },
@@ -244,8 +244,8 @@ const I18N = {
   de: {
     privacy: 'Dein Stundenplan wird nur in diesem Browser gespeichert. Es werden keine Daten erhoben.',
     welcomeTitle: 'Erstelle deinen Stundenplan',
-    welcomeText: 'Lege ein Profil an und importiere dann eine .ics-Datei aus dem Kalender deiner Uni.',
-    nameLabel: 'Profilname', namePh: 'z. B. Anna', create: 'Profil erstellen', tryExample: 'Beispiel ansehen',
+    welcomeText: 'Erstelle ein Konto und importiere dann eine .ics-Datei aus dem Kalender deiner Uni.',
+    nameLabel: 'Profilname', namePh: 'z. B. Anna', create: 'Profil erstellen', tryExample: 'Mal reinschauen',
     emptyTitle: 'Noch keine Veranstaltungen', emptyText: 'Importiere eine .ics-Datei aus dem Uni-Kalender.',
     importIcs: '.ics importieren', addClass: 'Veranstaltung hinzufügen', week: 'Woche', today: 'heute', now: 'jetzt',
     classes: { one: '{n} Veranstaltung', other: '{n} Veranstaltungen' },
@@ -277,8 +277,8 @@ const I18N = {
   ru: {
     privacy: 'Расписание хранится только в этом браузере. Никакие данные не собираются.',
     welcomeTitle: 'Собери своё расписание',
-    welcomeText: 'Создай профиль, а потом загрузи файл .ics из календаря университета.',
-    nameLabel: 'Имя профиля', namePh: 'например, Аня', create: 'Создать профиль', tryExample: 'Посмотреть пример',
+    welcomeText: 'Создай аккаунт, а потом загрузи файл .ics из календаря университета.',
+    nameLabel: 'Имя профиля', namePh: 'например, Аня', create: 'Создать профиль', tryExample: 'Посмотреть, как это выглядит',
     emptyTitle: 'Пока нет занятий', emptyText: 'Загрузи файл .ics из календаря университета.',
     importIcs: 'Загрузить .ics', addClass: 'Добавить занятие', week: 'Неделя', today: 'сегодня', now: 'идёт сейчас',
     classes: { one: '{n} пара', few: '{n} пары', many: '{n} пар', other: '{n} пары' },
@@ -636,8 +636,7 @@ function addBtnHtml() {
 }
 function welcomeView() {
   return `<section class="box hero" aria-labelledby="wt"><h2 id="wt">${esc(t('welcomeTitle'))}</h2><p>${esc(t('welcomeText'))}</p>
-    <form id="welcomeForm" class="sec" style="border:0;padding:0"><label class="f">${esc(t('nameLabel'))}<input class="in" id="wName" maxlength="40" autocomplete="off" placeholder="${esc(t('namePh'))}"></label>
-    <div class="toolbar"><button class="btn primary" type="submit">${esc(t('create'))}</button><button class="btn" type="button" data-act="example-new">${esc(t('tryExample'))}</button>${cloudOn() ? `<button class="btn" type="button" data-act="account">${esc(t('acctEntry'))}</button>` : ''}</div></form></section>`;
+    <div class="toolbar">${cloudOn() ? `<button class="btn primary" type="button" data-act="account">${esc(t('acctEntry'))}</button>` : ''}<button class="btn${cloudOn() ? '' : ' primary'}" type="button" data-act="example-new">${esc(t('tryExample'))}</button></div></section>`;
 }
 function emptyView() {
   return `<section class="box hero"><h2>${esc(t('emptyTitle'))}</h2><p>${esc(t('emptyText'))}</p>
@@ -829,7 +828,6 @@ $('#backupInput').addEventListener('change', e => { handleBackup(e.target.files[
 document.addEventListener('submit', e => {
   if (e.target.id === 'acctForm') { e.preventDefault(); submitAccount(e.target); return; }
   if (e.target.id === 'recForm') { e.preventDefault(); submitRecovery(e.target); return; }
-  if (e.target.id === 'welcomeForm') { e.preventDefault(); newProfile($('#wName').value); tab = null; render(); return; }
   if (e.target.id !== 'editForm') return;
   e.preventDefault();
   const f = new FormData(e.target), id = e.target.dataset.id, p = profile();
