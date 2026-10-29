@@ -233,6 +233,7 @@ const I18N = {
     acctEntry: 'Sign in or create account', acctSignIn: 'Sign in', acctCreate: 'Create account', acctEmail: 'Email', acctPassword: 'Password',
     acctNew: 'Create an account', acctHave: 'I have an account', acctForgot: 'Forgot password?', acctOut: 'Sign out',
     acctPwShort: 'Password must be at least 8 characters.', acctBadLogin: 'Wrong email or password.',
+    mailTitle: 'Check your email', mailText: 'We sent a confirmation link to %. Open it, then come back and sign in.', mailSpam: 'Nothing there? Look in spam.',
     acctConfirm: 'Check your email to confirm the account, then sign in.', acctConfirmed: 'Email confirmed. Now sign in.', acctLinkBad: 'This link is invalid or has expired.', acctResetSent: 'If this address is registered, a reset link is on its way.', acctNeedEmail: 'Enter your email first.',
     cloudNote: 'Your timetable is encrypted in your browser before it is sent. The site owner cannot read it.',
     privacyCloud: 'Your timetable is encrypted on your device and synced to your account. The site owner cannot read it.',
@@ -266,6 +267,7 @@ const I18N = {
     acctEntry: 'Anmelden oder Konto erstellen', acctSignIn: 'Anmelden', acctCreate: 'Konto erstellen', acctEmail: 'E-Mail', acctPassword: 'Passwort',
     acctNew: 'Konto erstellen', acctHave: 'Ich habe ein Konto', acctForgot: 'Passwort vergessen?', acctOut: 'Abmelden',
     acctPwShort: 'Das Passwort braucht mindestens 8 Zeichen.', acctBadLogin: 'E-Mail oder Passwort falsch.',
+    mailTitle: 'Schau in dein Postfach', mailText: 'Wir haben einen Bestätigungslink an % geschickt. Öffne ihn und melde dich dann an.', mailSpam: 'Nichts da? Schau im Spam-Ordner nach.',
     acctConfirm: 'Bestätige das Konto über die E-Mail und melde dich dann an.', acctConfirmed: 'E-Mail bestätigt. Melde dich jetzt an.', acctLinkBad: 'Dieser Link ist ungültig oder abgelaufen.', acctResetSent: 'Wenn diese Adresse registriert ist, ist ein Link zum Zurücksetzen unterwegs.', acctNeedEmail: 'Gib zuerst deine E-Mail ein.',
     cloudNote: 'Dein Stundenplan wird im Browser verschlüsselt, bevor er gesendet wird. Der Betreiber der Seite kann ihn nicht lesen.',
     privacyCloud: 'Dein Stundenplan wird auf deinem Gerät verschlüsselt und mit deinem Konto synchronisiert. Der Betreiber der Seite kann ihn nicht lesen.',
@@ -299,6 +301,7 @@ const I18N = {
     acctEntry: 'Войти или создать аккаунт', acctSignIn: 'Войти', acctCreate: 'Создать аккаунт', acctEmail: 'Почта', acctPassword: 'Пароль',
     acctNew: 'Создать аккаунт', acctHave: 'У меня есть аккаунт', acctForgot: 'Забыли пароль?', acctOut: 'Выйти',
     acctPwShort: 'Пароль должен быть не короче 8 символов.', acctBadLogin: 'Неверная почта или пароль.',
+    mailTitle: 'Проверь почту', mailText: 'Мы отправили ссылку для подтверждения на %. Открой её и потом войди.', mailSpam: 'Письма нет? Загляни в спам.',
     acctConfirm: 'Подтверди аккаунт по письму на почте, потом войди.', acctConfirmed: 'Почта подтверждена. Теперь войди.', acctLinkBad: 'Ссылка недействительна или устарела.', acctResetSent: 'Если этот адрес зарегистрирован, ссылка для сброса уже в пути.', acctNeedEmail: 'Сначала введи почту.',
     cloudNote: 'Расписание шифруется в твоём браузере до отправки. Владелец сайта не может его прочитать.',
     privacyCloud: 'Расписание шифруется на твоём устройстве и синхронизируется с аккаунтом. Владелец сайта не может его прочитать.',
@@ -993,6 +996,12 @@ function accountDialog(mode, msg) {
     <div class="menu"><button type="button" class="row-btn" data-act="acct-switch" data-mode="${up ? 'in' : 'up'}">${esc(up ? t('acctHave') : t('acctNew'))}</button>${up ? '' : `<button type="button" class="row-btn" data-act="forgot">${esc(t('acctForgot'))}</button>`}</div>
     <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn" data-act="close">${esc(t('cancel'))}</button><button type="submit" class="btn primary" id="acctGo">${esc(up ? t('acctCreate') : t('acctSignIn'))}</button></div></form>`);
 }
+function mailSentDialog(email) {
+  const ICON = '<svg viewBox="0 0 16 16" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9"/><path d="M1.5 4l6.5 5 6.5-5"/></svg>';
+  openDialog(`<div class="dlg-body"><div style="color:var(--lec)">${ICON}</div><h2 style="margin:0;font-size:20px">${esc(t('mailTitle'))}</h2>
+    <p style="margin:0">${esc(t('mailText')).replace('%', '<b>' + esc(email) + '</b>')}</p><p class="note" style="margin:0">${esc(t('mailSpam'))}</p>
+    <div class="dlg-actions"><span class="spacer"></span><button type="button" class="btn" data-act="close">${esc(t('close'))}</button><button type="button" class="btn primary" data-act="acct-switch" data-mode="in">${esc(t('acctSignIn'))}</button></div></div>`);
+}
 function recoveryKeyDialog(rec) {
   dlg.dataset.lock = '1';
   openDialog(`<div class="dlg-body"><h2 style="margin:0;font-size:20px">${esc(t('recTitle'))}</h2><p style="margin:0">${esc(t('recText'))}</p>
@@ -1043,7 +1052,7 @@ async function submitAccount(form) {
     let sess;
     if (mode === 'up') {
       sess = await api('/auth/v1/signup?redirect_to=' + encodeURIComponent(location.origin + location.pathname), { method: 'POST', body: { email, password } });
-      if (!sess.access_token) { accountDialog('in', t('acctConfirm')); return; }   // the project asks for email confirmation first
+      if (!sess.access_token) { mailSentDialog(email); return; }   // the project asks for email confirmation first
     } else {
       sess = await api('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
     }
