@@ -1088,9 +1088,9 @@ async function submitRecovery(form) {
 }
 async function signOut() {
   try { await api('/auth/v1/logout', { method: 'POST', auth: true }); } catch (_) { /* the local sign-out below is what matters */ }
-  const p = cloudProfile();
-  if (p) { p.cloud = false; delete p.rev; delete p.sh; }
-  state.acct = null; quietSave(); closeDialog(); render();
+  const p = cloudProfile();   // the copy lives in the account; drop it from this device so the welcome screen returns
+  if (p) { state.profiles = state.profiles.filter(q => q !== p); if (state.current === p.id) state.current = state.profiles[0]?.id || null; }
+  state.acct = null; tab = null; quietSave(); closeDialog(); render();
 }
 async function forgotPassword() {
   const email = ($('#acctForm').email.value || '').trim();
