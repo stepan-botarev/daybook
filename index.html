@@ -791,13 +791,11 @@ function settingsDialog(focusName) {
   const row = (act, label) => `<button type="button" class="row-btn" data-act="${act}">${esc(label)}</button>`;
   openDialog(`<div class="dlg-body">
     <h2 style="margin:0;font-size:20px">${esc(t('settings'))}</h2>
-    <input class="in" id="renameIn" maxlength="40" value="${esc(p.name)}" aria-label="${esc(t('profileName'))}">
-    ${signed ? `<p class="note" style="margin:0">${esc(state.acct.email)}<span id="syncLbl">${esc(syncLabel())}</span></p>` : ''}
+    ${signed ? `<p style="margin:0;font-size:16px;font-weight:600;overflow-wrap:anywhere">${esc(state.acct.email)}<span id="syncLbl" class="note">${esc(syncLabel())}</span></p>` : ''}
     ${!signed && state.profiles.length > 1 ? `<div class="menu">${state.profiles.map(q => `<button type="button" class="row-btn" data-switch="${esc(q.id)}" aria-pressed="${q.id === p.id}">${esc(q.name)}</button>`).join('')}</div>` : ''}
     <div class="menu">${row('import', t('importIcs'))}${row('export', t('exportBackup'))}${row('restore', t('importBackup'))}${cloudOn() && !signed ? row('account', t('acctEntry')) : ''}${signed ? row('signout', t('acctOut')) : ''}</div>
     <div class="dlg-actions">${signed ? '' : `<button type="button" class="linkbtn" data-act="delete-profile">${esc(t('delProfile'))}</button>`}<span class="spacer"></span>
       <button type="button" class="btn" data-act="close">${esc(t('close'))}</button></div></div>`);
-  if (focusName) { const el = $('#renameIn'); el.focus(); el.select(); }
 }
 function chooseDialog(message, onReplace, onAdd) {
   openDialog(`<div class="dlg-body"><p style="margin:0">${esc(message)}</p><div class="dlg-actions">
