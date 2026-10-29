@@ -59,7 +59,7 @@
   .btn { min-height: 44px; padding: 0 16px; border: 2px solid var(--ink); background: var(--panel); font: 600 15px var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
   .btn:hover { filter: brightness(1.05); }
   .btn.primary { background: var(--sem); box-shadow: 3px 3px 0 var(--ink); }
-  .btn.prof { min-height: 40px; padding: 0 14px; font-size: 14px; max-width: min(220px, 60vw); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 36px; }
+  .btn.prof { min-height: 40px; width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
   .btn[data-act="close"] { background: var(--lec); color: var(--lec-ink); }
   .btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
   .btn.danger { color: var(--danger); border-color: var(--danger); }
@@ -153,6 +153,7 @@
   .fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
   .fgrid .full { grid-column: 1 / -1; }
   dialog { border: 3px solid var(--ink); background: var(--panel); color: var(--ink); padding: 0; width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; }
+  dialog:focus { outline: none; }
   dialog::backdrop { background: rgba(27, 26, 51, 0.55); }
   .dlg-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
   .dlg-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
@@ -208,7 +209,7 @@
   <main id="app"></main>
   <footer id="privacy"></footer>
 </div>
-<dialog id="dlg"></dialog>
+<dialog id="dlg" tabindex="-1"></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <input type="file" id="icsInput" accept=".ics,text/calendar" hidden>
 <input type="file" id="backupInput" accept=".json,application/json" hidden>
@@ -627,8 +628,9 @@ function renderChrome() {
   $('#lang').innerHTML = LANGS.map(([c, l]) => `<button type="button" data-lang="${c}" aria-pressed="${c === state.lang}">${l}</button>`).join('');
   const p = profile(), b = $('#settingsBtn');
   b.hidden = !p;
-  if (p) { b.textContent = p.name; b.title = t('settings'); b.setAttribute('aria-label', t('settings') + ': ' + p.name); }
+  if (p) { b.innerHTML = GEAR; b.title = t('settings'); b.setAttribute('aria-label', t('settings')); }
 }
+const GEAR = '<svg viewBox="0 0 11 11" width="22" height="22" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M4 0h3v1h-3zM1 1h1v1h-1zM4 1h3v1h-3zM9 1h1v1h-1zM1 2h9v1h-9zM2 3h2v1h-2zM7 3h2v1h-2zM0 4h3v1h-3zM8 4h3v1h-3zM0 5h3v1h-3zM8 5h3v1h-3zM0 6h3v1h-3zM8 6h3v1h-3zM2 7h2v1h-2zM7 7h2v1h-2zM1 8h9v1h-9zM1 9h1v1h-1zM4 9h3v1h-3zM9 9h1v1h-1zM4 10h3v1h-3z"/></svg>';
 function usedDays(p) { return [...new Set(p.series.filter(s => !s.once).map(s => s.day))].sort((a, b) => a - b); }
 function render() {
   renderChrome();
@@ -710,7 +712,7 @@ function dayView(p, d) {
 
 /* ───────── dialogs ───────── */
 const dlg = $('#dlg');
-function openDialog(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); }
+function openDialog(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); dlg.focus({ preventScroll: true }); }   // no field grabs focus until the user clicks it
 function closeDialog() { if (dlg.open) dlg.close(); }
 function editDialog(id) {
   const p = profile();
