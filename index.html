@@ -1042,7 +1042,7 @@ async function submitAccount(form) {
   try {
     let sess;
     if (mode === 'up') {
-      sess = await api('/auth/v1/signup', { method: 'POST', body: { email, password } });
+      sess = await api('/auth/v1/signup?redirect_to=' + encodeURIComponent(location.origin + location.pathname), { method: 'POST', body: { email, password } });
       if (!sess.access_token) { accountDialog('in', t('acctConfirm')); return; }   // the project asks for email confirmation first
     } else {
       sess = await api('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
