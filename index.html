@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daybook</title>
+<meta name="description" content="Недельное расписание HU Berlin, зимний семестр 2026/27: сетка недели и карточки пар по дням.">
+<meta name="theme-color" content="#D8CCAF">
+<meta property="og:title" content="Daybook">
+<meta property="og:description" content="Зимний семестр 2026/27: сетка недели и пары по дням.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23D8CCAF'/%3E%3Crect x='3' y='3' width='12' height='12' fill='%232352A6' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='17' y='3' width='12' height='12' fill='%23EC6532' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='3' y='17' width='12' height='12' fill='%23EC6532' stroke='%231B1A33' stroke-width='2'/%3E%3Crect x='17' y='17' width='12' height='12' fill='%232352A6' stroke='%231B1A33' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Layout: one column, max 1040px; tabs switch between week grid and day cards. Single beige look by choice. */
+  :root {
+    --bg: #D8CCAF;
+    --panel: #E9DFC8;
+    --ink: #1B1A33;
+    --muted: #5C5442;
+    --line: #A79C83;
+    --free: #CFC2A3;
+    --lec: #2352A6;
+    --lec-ink: #F3ECDB;
+    --sem: #EC6532;
+    --sem-ink: #1B1A33;
+    --font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding-block: 40px 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  header {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+    gap: 8px 24px; border-bottom: 3px solid var(--ink); padding-bottom: 16px;
+  }
+  h1 { margin: 0; font-size: clamp(34px, 6vw, 48px); line-height: 1.05; letter-spacing: -0.01em; text-wrap: balance; }
+  .sub { margin: 8px 0 0; font-size: 16px; font-weight: 500; }
+  .source { margin: 0; font-size: 13px; color: var(--muted); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  nav button {
+    min-height: 54px; padding: 0 18px; border: 2px solid var(--ink); background: var(--panel);
+    color: var(--ink); font: 600 16px var(--font); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  }
+  nav button[aria-pressed="true"] { background: var(--ink); color: var(--lec-ink); }
+  nav button:focus-visible, a:focus-visible { outline: 3px solid var(--lec); outline-offset: 2px; }
+  nav .today { font: 500 11px/1 'IBM Plex Mono', ui-monospace, Menlo, monospace; letter-spacing: 0; }
+
+  .box { border: 3px solid var(--ink); background: var(--panel); }
+  .bar {
+    min-height: 36px; border-bottom: 3px solid var(--ink); display: flex; align-items: center;
+    justify-content: space-between; gap: 8px; padding: 6px 14px;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .lec { background: var(--lec); color: var(--lec-ink); }
+  .sem { background: var(--sem); color: var(--sem-ink); }
+  .free { background: var(--free); color: var(--ink); }
+  h2.bar { margin: 0; }
+
+  /* Week grid */
+  .grid-scroll { overflow-x: auto; }
+  .grid { min-width: 600px; padding: 14px; display: grid; grid-template-columns: 64px repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .grid .head { font-weight: 700; text-align: center; }
+  .time b { display: block; font-size: 16px; }
+  .time span { font-size: 13px; color: var(--muted); }
+  .cell {
+    min-height: 96px; border: 2px solid var(--ink); padding: 10px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+    width: 100%; font: inherit; text-align: left; cursor: pointer;
+  }
+  button.cell:hover { filter: brightness(1.08); }
+  button.cell:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .cell small { display: block; }
+  .cell.empty { border: 2px dashed var(--line); }
+  .cell .abbr { font-size: 22px; font-weight: 700; line-height: 1; display: flex; justify-content: space-between; align-items: flex-start; }
+  .cell small { font-size: 13px; line-height: 17px; }
+  .half { font-size: 12px; font-weight: 700; line-height: 1; padding: 2px 5px; background: var(--ink); color: var(--lec-ink); }
+  .cell.is-today { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 20px; }
+  .row > .box { flex: 1 1 260px; min-width: 0; }
+  .row > .box.wide { flex: 2 1 380px; }
+  .list { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .list div { display: flex; gap: 12px; align-items: center; }
+  .list b { width: 40px; flex-shrink: 0; }
+  .sw { width: 16px; height: 16px; flex-shrink: 0; border: 2px solid var(--ink); }
+  .note { margin: 0; font-size: 14px; max-width: 70ch; }
+
+  /* Day view */
+  .day-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+  .day-head h2 { margin: 0; font-size: 34px; line-height: 1.1; }
+  .day-head span { font-size: 16px; font-weight: 600; }
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card-body { padding: 14px 16px 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px 16px; }
+  .card-main { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .card-title { font-size: 21px; font-weight: 700; line-height: 26px; }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag { font-size: 13px; font-weight: 600; padding: 3px 9px; border: 2px solid var(--ink); }
+  .tag.b { background: var(--ink); color: var(--lec-ink); }
+  .tag.m { border-style: dashed; }
+  .tag.now { background: var(--sem); }
+  .card-free { padding: 18px 16px; text-align: center; color: var(--muted); font-weight: 500; }
+  .pic { border: 3px solid var(--ink); width: min(100%, 760px); margin-inline: auto; line-height: 0; }
+  .pic img { display: block; width: 100%; height: auto; }
+
+  /* Phone: compact week grid — subject + colour only, tap opens the day */
+  @media (max-width: 600px) {
+    nav { display: grid; grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr)); gap: 6px; }
+    nav button { padding: 0 2px; font-size: 13px; min-width: 0; }
+    nav .today { font-size: 10px; }
+    .grid { min-width: 0; padding: 8px; gap: 5px; grid-template-columns: 38px repeat(4, minmax(0, 1fr)); }
+    .cell { min-height: 58px; padding: 4px; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+    .cell small { display: none; }
+    .cell .abbr { font-size: 15px; flex-direction: column; align-items: center; gap: 4px; letter-spacing: -0.01em; }
+    .half { font-size: 10px; padding: 1px 4px; }
+    .cell.is-today { outline-width: 2px; outline-offset: 1px; }
+    .time { padding-top: 2px; }
+    .time b { font-size: 13px; }
+    .time span { font-size: 11px; }
+  }
+  @media (max-width: 520px) {
+    .day-head h2 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Daybook</h1>
+      <p class="sub">Расписание HU Berlin · Зимний семестр 2026/27</p>
+    </div>
+    <p class="source">По расписанию HU от 14.10.2026</p>
+  </header>
+
+  <nav id="tabs" aria-label="Дни недели"></nav>
+
+  <main id="view"></main>
+</div>
+
+<script>
+const KIND = {
+  lec: { label: 'Лекция', cls: 'lec' },
+  sem: { label: 'Семинар', cls: 'sem' },
+  lab: { label: 'Практикум', cls: 'sem' }
+};
+const FREQ = {
+  w: { label: 'каждую неделю', cls: '' },
+  b: { label: 'раз в 2 недели', cls: 'b' },
+  m: { label: 'добавлено вручную', cls: 'm' }
+};
+const SUBJECTS = {
+  DS: 'Diskrete Strukturen',
+  GdP: 'Grundlagen der Programmierung',
+  ETI: 'Einführung in die Theoretische Informatik',
+  IiK: 'Informatik im Kontext'
+};
+const TIMES = [['11:00', '13:00'], ['13:00', '15:00'], ['15:00', '17:00'], ['17:00', '19:00']];
+
+// Каждая пара: слот (0–3), предмет, тип, частота, аудитория, корпус, преподаватель.
+const DAYS = [
+  { id: 'mon', short: 'Пн', name: 'Понедельник', note: 'Занятие в 11:00 — раз в две недели. Точные даты уточняй в AGNES.', classes: [
+    { slot: 0, subj: 'DS',  kind: 'lec', freq: 'b', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' },
+    { slot: 1, subj: 'GdP', kind: 'sem', freq: 'w', room: 'Семинарская аудитория 1305', bld: 'RUD 26', who: 'Chan' },
+    { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' },
+    { slot: 3, subj: 'DS',  kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Schweikardt' }
+  ] },
+  { id: 'tue', short: 'Вт', name: 'Вторник', img: 'berlin.png', alt: 'Пиксельный Берлин на закате: телебашня, Бранденбургские ворота, собор',
+    note: 'Все занятия этого дня указаны как еженедельные.', classes: [
+    { slot: 1, subj: 'ETI', kind: 'sem', freq: 'w', room: 'Семинарская аудитория 1306', bld: 'RUD 26', who: 'Casel' },
+    { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
+  ] },
+  { id: 'wed', short: 'Ср', name: 'Среда', img: 'paris.png', alt: 'Пиксельный Париж на закате: Эйфелева башня, Нотр-Дам, мост над Сеной',
+    note: 'Семинар в 11:00 — раз в две недели.', classes: [
+    { slot: 0, subj: 'DS',  kind: 'sem', freq: 'b', room: 'Семинарская аудитория 1305', bld: 'RUD 26', who: '' },
+    { slot: 1, subj: 'GdP', kind: 'lab', freq: 'w', room: 'Аудитория 3.210', bld: 'RUD 25', who: 'Dorian' },
+    { slot: 2, subj: 'GdP', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Redlich' }
+  ] },
+  { id: 'thu', short: 'Чт', name: 'Четверг', img: 'bridge.png', alt: 'Пиксельный мост и город в сумерках',
+    note: 'Все занятия этого дня указаны как еженедельные.', classes: [
+    { slot: 1, subj: 'IiK', kind: 'lec', freq: 'w', room: 'Аудитория 3.001', bld: 'RUD 25', who: 'Vladova' },
+    { slot: 2, subj: 'ETI', kind: 'lec', freq: 'w', room: 'Аудитория 0115', bld: 'RUD 26', who: 'Kratsch' }
+  ] }
+];
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const plural = n => n === 1 ? 'пара' : (n >= 2 && n <= 4 ? 'пары' : 'пар');
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+const now = new Date();
+const todayId = ['', 'mon', 'tue', 'wed', 'thu', '', ''][now.getDay()] || null;
+const nowMin = now.getHours() * 60 + now.getMinutes();
+
+function summary(day) {
+  const slots = day.classes.map(c => c.slot);
+  const from = TIMES[Math.min(...slots)][0], to = TIMES[Math.max(...slots)][1];
+  return `${day.classes.length} ${plural(day.classes.length)} · ${from}–${to}`;
+}
+
+function renderWeek() {
+  let cells = '<span></span>' + DAYS.map(d => `<span class="head">${d.short}</span>`).join('');
+  TIMES.forEach(([f, t], i) => {
+    cells += `<div class="time"><b>${f}</b><span>${t}</span></div>`;
+    DAYS.forEach(d => {
+      const c = d.classes.find(x => x.slot === i);
+      if (!c) { cells += '<div class="cell empty" aria-hidden="true"></div>'; return; }
+      const k = KIND[c.kind];
+      const today = d.id === todayId ? ' is-today' : '';
+      cells += `<button type="button" class="cell ${k.cls}${today}" data-go="${d.id}" aria-label="${d.name}, ${f}: ${SUBJECTS[c.subj]}, ${k.label.toLowerCase()}">
+        <span class="abbr">${c.subj}${c.freq === 'b' ? '<span class="half" title="раз в две недели">½</span>' : ''}</span>
+        <small><b>${k.label}</b><br>${esc(c.room.replace(/^\D+/, ''))} · ${c.bld}</small>
+      </button>`;
+    });
+  });
+  return `
+    <div class="cards" style="gap:20px">
+      <section class="box grid-scroll" aria-label="Сетка недели"><div class="grid">${cells}</div></section>
+      <div class="row">
+        <section class="box wide">
+          <h2 class="bar sem">Предметы</h2>
+          <div class="list">${Object.entries(SUBJECTS).map(([a, n]) => `<div><b>${a}</b><span>${n}</span></div>`).join('')}</div>
+        </section>
+        <section class="box">
+          <h2 class="bar lec">Обозначения</h2>
+          <div class="list">
+            <div><span class="sw lec"></span>лекция</div>
+            <div><span class="sw sem"></span>семинар / практикум</div>
+            <div><span class="half">½</span>раз в две недели</div>
+          </div>
+        </section>
+      </div>
+    </div>`;
+}
+
+function renderDay(day) {
+  const isToday = day.id === todayId;
+  const first = Math.min(...day.classes.map(c => c.slot));
+  const last = Math.max(...day.classes.map(c => c.slot));
+  let cards = '';
+  for (let i = first === 1 ? 0 : first; i <= last; i++) {
+    const [f, t] = TIMES[i];
+    const c = day.classes.find(x => x.slot === i);
+    if (!c) {
+      cards += `<section class="box"><div class="bar free"><span>Свободно</span><span>${f}–${t}</span></div><div class="card-free">Нет занятий</div></section>`;
+      continue;
+    }
+    const k = KIND[c.kind], fr = FREQ[c.freq];
+    const live = isToday && nowMin >= toMin(f) && nowMin < toMin(t);
+    cards += `<section class="box">
+      <div class="bar ${k.cls}"><span>${k.label}</span><span>${f}–${t}</span></div>
+      <div class="card-body">
+        <div class="card-main">
+          <div class="card-title">${SUBJECTS[c.subj]}</div>
+          <div>${esc(c.room)} · ${c.bld}${c.who ? `<br>Преподаватель: ${esc(c.who)}` : ''}</div>
+        </div>
+        <div class="tags">${live ? '<span class="tag now">идёт сейчас</span>' : ''}<span class="tag ${fr.cls}">${fr.label}</span></div>
+      </div>
+    </section>`;
+  }
+  return `
+    <div class="cards">
+      <div class="day-head"><h2>${day.name}${isToday ? ' · сегодня' : ''}</h2><span>${summary(day)}</span></div>
+      ${cards}
+      ${day.img ? `<div class="pic"><img src="${day.img}" alt="${esc(day.alt)}"></div>` : ''}
+      <p class="note">${esc(day.note)}</p>
+    </div>`;
+}
+
+const TABS = [{ id: 'week', short: 'Неделя' }, ...DAYS];
+let current = TABS.some(t => t.id === location.hash.slice(1)) ? location.hash.slice(1) : (todayId || 'week');
+
+function render() {
+  document.getElementById('tabs').innerHTML = TABS.map(t =>
+    `<button type="button" data-id="${t.id}" aria-pressed="${t.id === current}">${t.short}${t.id === todayId ? '<span class="today">сегодня</span>' : ''}</button>`
+  ).join('');
+  const day = DAYS.find(d => d.id === current);
+  document.getElementById('view').innerHTML = day ? renderDay(day) : renderWeek();
+}
+
+function go(id) {
+  current = id;
+  try { history.replaceState(null, '', '#' + current); } catch (_) {}
+  render();
+}
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b) go(b.dataset.id);
+});
+
+document.getElementById('view').addEventListener('click', e => {
+  const b = e.target.closest('[data-go]');
+  if (!b) return;
+  go(b.dataset.go);
+  document.getElementById('tabs').scrollIntoView({ block: 'start' });
+});
+
+render();
+</script>
+</body>
+</html>
